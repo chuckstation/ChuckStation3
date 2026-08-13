@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive launcher icon foreground: a stylised "C3" glyph on a transparent
+     background. The background colour comes from ic_launcher_background. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+        android:width="108dp"
+        android:height="108dp"
+        android:viewportWidth="108"
+        android:viewportHeight="108">
+    <group android:scaleX="0.55"
+           android:scaleY="0.55"
+           android:translateX="24.3"
+           android:translateY="34.65">
+        <path android:fillColor="#FFFFFF"
+              android:pathData="M45,12 C25,12 9,28 9,48 C9,68 25,84 45,84 C55,84 64,80 71,73 L62,64 C57,69 51,72 45,72 C32,72 21,61 21,48 C21,35 32,24 45,24 C51,24 57,27 62,32 L71,23 C64,16 55,12 45,12 Z" />
+        <path android:fillColor="#FFFFFF"
+              android:pathData="M55,48 L78,48 L78,60 L55,60 Z" />
+        <path android:fillColor="#FFFFFF"
+              android:pathData="M82,36 L95,36 L95,72 L82,72 Z" />
+    </group>
+</vector>

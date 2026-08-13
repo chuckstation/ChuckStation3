@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+#
+# ChuckStation 3 — minimal Gradle wrapper.
+#
+# This is a self-contained replacement for the upstream Gradle wrapper that
+# does NOT require committing gradle-wrapper.jar. It:
+#
+#   1. Uses `gradle` from $PATH if available.
+#   2. Otherwise, downloads the Gradle distribution specified in
+#      gradle/wrapper/gradle-wrapper.properties, caches it under
+#      $GRADLE_USER_HOME (default ~/.gradle), and uses that.
+#
+# This is functionally equivalent to the upstream wrapper for the subset of
+# commands the ChuckStation 3 build needs. If you prefer the upstream wrapper
+# (which provides better progress reporting and integrity checking), run:
+#
+#   gradle wrapper --gradle-version 8.7
+#
+# once, which will generate the standard gradlew + gradlew.bat + the .jar.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROPS_FILE="$SCRIPT_DIR/gradle/wrapper/gradle-wrapper.properties"
+
+if [ ! -f "$PROPS_FILE" ]; then
+    echo "ChuckStation3: missing $PROPS_FILE" >&2
+    exit 1
+fi
+
+# Extract distributionUrl from the properties file.
+DIST_URL="$(grep -E '^distributionUrl=' "$PROPS_FILE" | cut -d= -f2-)"
+DIST_URL="${DIST_URL//\\/}"   # strip backslashes introduced by Java .properties escaping
+
+if [ -z "$DIST_URL" ]; then
+    echo "ChuckStation3: distributionUrl not set in $PROPS_FILE" >&2
+    exit 1
+fi
+
+GRADLE_USER_HOME="${GRADLE_USER_HOME:-$HOME/.gradle}"
+CACHE_DIR="$GRADLE_USER_HOME/wrapper/dists"
+mkdir -p "$CACHE_DIR"
+
+# Derive a stable install dir from the URL.
+DIST_HASH="$(echo -n "$DIST_URL" | sha1sum | cut -d' ' -f1)"
+DIST_BASENAME="$(basename "$DIST_URL")"           # e.g. gradle-8.7-bin.zip
+DIST_NAME="${DIST_BASENAME%-bin.zip}"             # e.g. gradle-8.7
+INSTALL_DIR="$CACHE_DIR/$DIST_HASH/$DIST_NAME"
+
+if [ ! -x "$INSTALL_DIR/bin/gradle" ]; then
+    echo "ChuckStation3: downloading $DIST_BASENAME..." >&2
+    ZIP_PATH="$CACHE_DIR/$DIST_HASH/$DIST_BASENAME"
+    mkdir -p "$(dirname "$ZIP_PATH")"
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fL --connect-timeout 30 -o "$ZIP_PATH" "$DIST_URL"
+    elif command -v wget >/dev/null 2>&1; then
+        wget --timeout=30 -O "$ZIP_PATH" "$DIST_URL"
+    else
+        echo "ChuckStation3: neither curl nor wget is available." >&2
+        exit 1
+    fi
+
+    # Extract.
+    UNPACK_DIR="$CACHE_DIR/$DIST_HASH/$DIST_NAME.tmp"
+    rm -rf "$UNPACK_DIR"
+    mkdir -p "$UNPACK_DIR"
+    if command -v unzip >/dev/null 2>&1; then
+        unzip -q -d "$UNPACK_DIR" "$ZIP_PATH"
+    else
+        # Python fallback.
+        python3 -c "import zipfile, sys; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])" "$ZIP_PATH" "$UNPACK_DIR"
+    fi
+
+    # The zip extracts a single gradle-<version>/ dir; move it into place.
+    rm -rf "$INSTALL_DIR"
+    mkdir -p "$(dirname "$INSTALL_DIR")"
+    mv "$UNPACK_DIR/gradle-"* "$INSTALL_DIR"
+    rm -rf "$UNPACK_DIR"
+fi
+
+exec "$INSTALL_DIR/bin/gradle" "$@"

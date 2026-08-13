@@ -1,0 +1,47 @@
+# Normalise line endings; allow git to compute sensible diffs for binary assets.
+* text=auto eol=lf
+
+# Source
+*.cpp   text eol=lf
+*.hpp   text eol=lf
+*.h     text eol=lf
+*.c     text eol=lf
+*.in    text eol=lf
+*.ui    text eol=lf
+*.rc    text eol=lf
+*.kts   text eol=lf
+*.gradle text eol=lf
+*.properties text eol=lf
+*.xml   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.json  text eol=lf
+*.toml  text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+CMakeLists.txt text eol=lf
+.gitignore   text eol=lf
+.gitmodules  text eol=lf
+.gitattributes text eol=lf
+.clang-format text eol=lf
+.clang-tidy   text eol=lf
+
+# Binary assets
+*.png   binary
+*.gif   binary
+*.ico   binary
+*.jpg   binary
+*.jpeg  binary
+*.webp  binary
+*.icns  binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.7z    binary
+
+# Linguist: treat .ui files as XML, not as something to render.
+*.ui linguist-language=XML
+
+# Mark generated artifacts so GitHub doesn't show them in diffs.
+*.apk linguist-generated=true
+*.dex linguist-generated=true

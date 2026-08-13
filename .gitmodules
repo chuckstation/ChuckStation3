@@ -1,0 +1,27 @@
+# ChuckStation3 third-party submodules.
+# Paths are relative to the repo root. Use:
+#   git clone --recursive https://github.com/ChcukStation/ChuckStation3.git
+# or, after a plain clone:
+#   git submodule update --init --recursive
+
+[submodule "third_party/ELFIO"]
+	path = third_party/ELFIO
+	url = https://github.com/serge1/ELFIO.git
+[submodule "third_party/xxHash"]
+	path = third_party/xxHash
+	url = https://github.com/Cyan4973/xxHash.git
+[submodule "third_party/toml11"]
+	path = third_party/toml11
+	url = https://github.com/ToruNiina/toml11.git
+[submodule "third_party/SDL"]
+	path = third_party/SDL
+	url = https://github.com/ChonkyStation3/SDL.git
+[submodule "third_party/capstone"]
+	path = third_party/capstone
+	url = https://github.com/capstone-engine/capstone.git
+[submodule "third_party/miniaudio"]
+	path = third_party/miniaudio
+	url = https://github.com/mackron/miniaudio.git
+[submodule "third_party/plusaes"]
+	path = third_party/plusaes
+	url = https://github.com/kkAyataka/plusaes.git
