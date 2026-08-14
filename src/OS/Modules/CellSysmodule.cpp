@@ -1,9 +1,9 @@
-#include <Modules/CellSysmodule.hpp>
 #include "PlayStation3.hpp"
 
+#include <Modules/CellSysmodule.hpp>
 
 u64 CellSysmodule::cellSysmoduleUnloadModule() {
-    const u16 module_id = ARG0;
+    const u16  module_id   = ARG0;
     const auto module_name = getModule(module_id);
     log("cellSysmoduleUnloadModule(module: %s)\n", module_name.c_str());
 
@@ -14,13 +14,13 @@ u64 CellSysmodule::cellSysmoduleUnloadModule() {
 }
 
 u64 CellSysmodule::cellSysmoduleLoadModule() {
-    const u16 module_id = ARG0;
+    const u16  module_id   = ARG0;
     const auto module_name = getModule(module_id);
     log("cellSysmoduleLoadModule(module: %s)\n", module_name.c_str());
 
     if (module_name == "BAD") {
         log("WARNING: cellSysmoduleLoadModule unknown module id %d\n", module_id);
-        return 0x80012002;  // CELL_SYSMODULE_ERROR_UNKNOWN
+        return 0x80012002; // CELL_SYSMODULE_ERROR_UNKNOWN
     }
 
     return CELL_OK;

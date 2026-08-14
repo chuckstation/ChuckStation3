@@ -1,19 +1,24 @@
-#include <Capture/RSXCaptureReplayer.hpp>
 #include "PlayStation3.hpp"
 
+#include <Capture/RSXCaptureReplayer.hpp>
 
 void RSXCaptureReplayer::load(fs::path capture_dir) {
     log("Loading capture %s\n", capture_dir.generic_string().c_str());
-    Helpers::debugAssert(fs::is_directory(capture_dir), "RSXCaptureReplayer::load: path %s is not a directory\n", capture_dir.generic_string().c_str());
-    Helpers::debugAssert(fs::is_directory(capture_dir / "memblocks"), "RSXCaptureReplayer::load: capture %s has no memblocks\n", capture_dir.filename().generic_string().c_str());
-    Helpers::debugAssert(fs::exists(capture_dir / "capture.cscf"), "RSXCaptureReplayer::load: path %s is not a valid capture (missing capture.cscf)\n");
+    Helpers::debugAssert(fs::is_directory(capture_dir),
+                         "RSXCaptureReplayer::load: path %s is not a directory\n",
+                         capture_dir.generic_string().c_str());
+    Helpers::debugAssert(fs::is_directory(capture_dir / "memblocks"),
+                         "RSXCaptureReplayer::load: capture %s has no memblocks\n",
+                         capture_dir.filename().generic_string().c_str());
+    Helpers::debugAssert(fs::exists(capture_dir / "capture.cscf"),
+                         "RSXCaptureReplayer::load: path %s is not a valid capture (missing capture.cscf)\n");
 
     auto fifo = Helpers::readBinary(capture_dir / "capture.cscf");
     Helpers::debugAssert(*(u32*)&fifo[0] == *(u32*)CSCF_MAGIC, "RSXCaptureReplayer::load: capture.cscf is not valid\n");
 
     // Allocate some space for local variables
-    auto vars_entry = ps3->mem.alloc(1_MB);
-    u32 curr_var_ptr = vars_entry->vaddr;
+    auto vars_entry   = ps3->mem.alloc(1_MB);
+    u32  curr_var_ptr = vars_entry->vaddr;
 
     // Init cellGcm, but don't init IO (by passing 0 as IO size) (we will do that manually later)
     u32 ctx_ptr = curr_var_ptr;
@@ -30,8 +35,9 @@ void RSXCaptureReplayer::load(fs::path capture_dir) {
 
     // Allocate FIFO data
     log("* Initializing RSX FIFO data\n");
-    const auto io_size = fifo.size() + 1_MB;
-    auto fifo_entry = ps3->mem.alloc(io_size, 0x30000000);  // Must be aligned to 1 MB (1 << 20) boundary, we can just place it at 0x30000000
+    const auto io_size    = fifo.size() + 1_MB;
+    auto       fifo_entry = ps3->mem.alloc(
+        io_size, 0x30000000); // Must be aligned to 1 MB (1 << 20) boundary, we can just place it at 0x30000000
     // Copy FIFO data
     std::memcpy(ps3->mem.getPtr(fifo_entry->vaddr), fifo.data() + 8, fifo.size() - 8);
 
@@ -42,18 +48,21 @@ void RSXCaptureReplayer::load(fs::path capture_dir) {
         ps3->module_manager.cellGcmSys.mapEaIo(fifo_entry->vaddr + (i << 20), start_offs + (i << 20));
 
     // Initialize fifo control
-    const u32 end_offs = *(u32*)&fifo[4];
-    CellGcmSys::CellGcmControl* ctrl = (CellGcmSys::CellGcmControl*)ps3->mem.getPtr(ps3->module_manager.cellGcmSys.cellGcmGetControlRegister());
+    const u32                   end_offs = *(u32*)&fifo[4];
+    CellGcmSys::CellGcmControl* ctrl =
+        (CellGcmSys::CellGcmControl*)ps3->mem.getPtr(ps3->module_manager.cellGcmSys.cellGcmGetControlRegister());
     ctrl->get = start_offs;
     ctrl->put = end_offs;
-    //ps3->mem.write<u32>(ps3->rsx.ioToEa(end_offs), 0);
+    // ps3->mem.write<u32>(ps3->rsx.ioToEa(end_offs), 0);
 
     // Setup memory blocks
     log("* Loading memory blocks\n");
     for (auto& i : fs::directory_iterator(capture_dir / "memblocks")) {
         // Load CSCM file
         auto memblock = Helpers::readBinary(i.path());
-        Helpers::debugAssert(*(u32*)&memblock[0] == *(u32*)CSCM_MAGIC, "RSXCaptureReplayer::load: memblock %s is not valid\n", i.path().filename().generic_string().c_str());
+        Helpers::debugAssert(*(u32*)&memblock[0] == *(u32*)CSCM_MAGIC,
+                             "RSXCaptureReplayer::load: memblock %s is not valid\n",
+                             i.path().filename().generic_string().c_str());
         const u32 addr = *(u32*)&memblock[4];
         const u32 size = memblock.size() - 8;
         // Allocate memory
@@ -63,8 +72,7 @@ void RSXCaptureReplayer::load(fs::path capture_dir) {
                 const auto block = ps3->mem.rsx.allocPhys(size);
                 ps3->mem.rsx.mmap(addr, block->start, size);
             }
-        }
-        else {
+        } else {
             if (!ps3->mem.isMapped(addr).first) {
                 const auto block = ps3->mem.allocPhys(size);
                 ps3->mem.mmap(addr, block->start, size);

@@ -1,6 +1,6 @@
 #include "Filesystem.hpp"
-#include "PlayStation3.hpp"
 
+#include "PlayStation3.hpp"
 
 void Filesystem::mount(Filesystem::Device device, fs::path path) {
     mounted_devices[device] = path;
@@ -8,7 +8,8 @@ void Filesystem::mount(Filesystem::Device device, fs::path path) {
 }
 
 void Filesystem::umount(Filesystem::Device device) {
-    if (!mounted_devices.contains(device)) Helpers::panic("Tried to unmount an unmounted device (%s)\n", deviceToString(device).c_str());
+    if (!mounted_devices.contains(device))
+        Helpers::panic("Tried to unmount an unmounted device (%s)\n", deviceToString(device).c_str());
 
     mounted_devices.erase(device);
     log("Unmounted device %s\n", deviceToString(device).c_str());
@@ -33,13 +34,16 @@ void Filesystem::initialize() {
 
 u32 Filesystem::open(fs::path path, u32 flags) {
     const fs::path host_path = ps3->fs.guestPathToHost(path);
-    const bool create = flags & CELL_FS_O_CREAT;
+    const bool     create    = flags & CELL_FS_O_CREAT;
 
     std::string mode = "rb";
-    if (flags & CELL_FS_O_ACCMODE) {    // unnecessary I think
-        if (flags & CELL_FS_O_RDONLY)      mode = "rb";
-        else if (flags & CELL_FS_O_WRONLY) mode = "wb";
-        else mode = "rb+";
+    if (flags & CELL_FS_O_ACCMODE) { // unnecessary I think
+        if (flags & CELL_FS_O_RDONLY)
+            mode = "rb";
+        else if (flags & CELL_FS_O_WRONLY)
+            mode = "wb";
+        else
+            mode = "rb+";
     }
 
     if (flags & CELL_FS_O_EXCL) {
@@ -57,7 +61,7 @@ u32 Filesystem::open(fs::path path, u32 flags) {
     if (!fs::exists(host_path)) {
         // For CELL_FS_O_CREAT, the parent path must exist, otherwise return an error regardless
         if (!create || !fs::exists(host_path.parent_path())) {
-            //Helpers::panic("Tried to open non-existing file %s\n", path.generic_string().c_str());
+            // Helpers::panic("Tried to open non-existing file %s\n", path.generic_string().c_str());
             log("WARNING: Tried to open non-existing file %s\n", path.generic_string().c_str());
             return 0;
         } else {
@@ -68,11 +72,11 @@ u32 Filesystem::open(fs::path path, u32 flags) {
     }
 
     const u32 new_file_id = ps3->handle_manager.request();
-    FILE* file = std::fopen(host_path.generic_string().c_str(), mode.c_str());
+    FILE*     file        = std::fopen(host_path.generic_string().c_str(), mode.c_str());
     if (!file) {
         Helpers::panic("Failed to open file %s with mode %s\n", host_path.generic_string().c_str(), mode.c_str());
     }
-    open_files[new_file_id] = { file, host_path, path, flags };
+    open_files[new_file_id] = {file, host_path, path, flags};
     log("Opened file %s\n", host_path.generic_string().c_str());
     return new_file_id;
 }
@@ -84,8 +88,8 @@ u32 Filesystem::opendir(fs::path path) {
         return 0;
     }
 
-    const u32 new_file_id = ps3->handle_manager.request();
-    open_dirs[new_file_id] = { path, 0 };
+    const u32 new_file_id  = ps3->handle_manager.request();
+    open_dirs[new_file_id] = {path, 0};
     log("Opened directory %s\n", path.generic_string().c_str());
     return new_file_id;
 }
@@ -102,10 +106,10 @@ void Filesystem::closedir(u32 file_id) {
 
 u64 Filesystem::read(u32 file_id, u32 buf_ptr, u64 size) {
     // Read up to PAGE_SIZE at max, split into multiple reads if larger
-    FILE* file = getFileFromID(file_id).file;
-    u64 bytes_read = 0;
-    u32 cur_ptr = buf_ptr;
-    u64 size_remaining = size;
+    FILE* file           = getFileFromID(file_id).file;
+    u64   bytes_read     = 0;
+    u32   cur_ptr        = buf_ptr;
+    u64   size_remaining = size;
 
     // Make the first read read up to page boundary, so that the next reads are page aligned
     const u64 to_read = std::min(size_remaining, ps3->mem.ram.pageAlign(buf_ptr) - buf_ptr);
@@ -125,10 +129,10 @@ u64 Filesystem::read(u32 file_id, u32 buf_ptr, u64 size) {
 
 u64 Filesystem::write(u32 file_id, u32 buf_ptr, u64 size) {
     // Write up to PAGE_SIZE at max, split into multiple writes if larger
-    FILE* file = getFileFromID(file_id).file;
-    u64 bytes_written = 0;
-    u32 cur_ptr = buf_ptr;
-    u64 size_remaining = size;
+    FILE* file           = getFileFromID(file_id).file;
+    u64   bytes_written  = 0;
+    u32   cur_ptr        = buf_ptr;
+    u64   size_remaining = size;
 
     // Make the first write write up to page boundary, so that the next writes are page aligned
     const u64 to_write = std::min(size_remaining, ps3->mem.ram.pageAlign(buf_ptr) - buf_ptr);
@@ -164,7 +168,8 @@ u64 Filesystem::tell(u32 file_id) {
 // Returns false if path already exists
 bool Filesystem::mkdir(fs::path path) {
     const fs::path host_path = ps3->fs.guestPathToHost(path);
-    if (fs::exists(host_path)) return false;
+    if (fs::exists(host_path))
+        return false;
 
     fs::create_directories(host_path);
     return true;
@@ -220,7 +225,7 @@ bool Filesystem::isDeviceMounted(fs::path path) {
 
 fs::path Filesystem::guestPathToHost(fs::path path) {
     const std::string path_str = path.generic_string();
-    fs::path guest_path;
+    fs::path          guest_path;
 
     // Check if the path is valid
     // TODO: I assume relative paths can exist too...?
@@ -229,7 +234,7 @@ fs::path Filesystem::guestPathToHost(fs::path path) {
 
     // Check if device is valid
     std::string device_str = std::next(path.begin(), 1)->generic_string();
-    Device device = stringToDevice(device_str);
+    Device      device     = stringToDevice(device_str);
     if (device == Device::INVALID)
         Helpers::panic("Path %s: device %s is not a valid device\n", path_str.c_str(), device_str.c_str());
 
@@ -239,14 +244,15 @@ fs::path Filesystem::guestPathToHost(fs::path path) {
 
     // Check if this path contains only the device
     int count = 0;
-    for (const auto& i : path) count++;
+    for (const auto& i : path)
+        count++;
     if (count == 2 || (count == 3 && path.filename().empty())) {
         return mounted_devices[device];
     }
 
     // Convert to host path
     std::string path_no_device_start = std::next(path.begin(), 2)->generic_string();
-    fs::path path_no_device = path_str.substr(path_str.find(path_no_device_start));
+    fs::path    path_no_device       = path_str.substr(path_str.find(path_no_device_start));
 
     guest_path = mounted_devices[device] / path_no_device;
     return guest_path;
@@ -263,45 +269,79 @@ bool Filesystem::isValidDevice(fs::path path) {
 }
 
 std::string Filesystem::deviceToString(Filesystem::Device device) {
-    if (device == Device::INVALID) Helpers::panic("deviceToString: invalid device\n");
+    if (device == Device::INVALID)
+        Helpers::panic("deviceToString: invalid device\n");
 
     switch (device) {
-    case Device::DEV_FLASH:     return "dev_flash";
-    case Device::DEV_HDD0:      return "dev_hdd0";
-    case Device::DEV_HDD1:      return "dev_hdd1";
-    case Device::DEV_USB000:    return "dev_usb000";
-    case Device::DEV_USB001:    return "dev_usb001";
-    case Device::DEV_USB002:    return "dev_usb002";
-    case Device::DEV_USB003:    return "dev_usb003";
-    case Device::DEV_USB004:    return "dev_usb004";
-    case Device::DEV_USB005:    return "dev_usb005";
-    case Device::DEV_USB006:    return "dev_usb006";
-    case Device::DEV_USB007:    return "dev_usb007";
-    case Device::DEV_MS:        return "dev_ms";
-    case Device::DEV_CF:        return "dev_cf";
-    case Device::DEV_SD:        return "dev_sd";
-    case Device::DEV_BDVD:      return "dev_bdvd";
-    case Device::APP_HOME:      return "app_home";
+        case Device::DEV_FLASH:
+            return "dev_flash";
+        case Device::DEV_HDD0:
+            return "dev_hdd0";
+        case Device::DEV_HDD1:
+            return "dev_hdd1";
+        case Device::DEV_USB000:
+            return "dev_usb000";
+        case Device::DEV_USB001:
+            return "dev_usb001";
+        case Device::DEV_USB002:
+            return "dev_usb002";
+        case Device::DEV_USB003:
+            return "dev_usb003";
+        case Device::DEV_USB004:
+            return "dev_usb004";
+        case Device::DEV_USB005:
+            return "dev_usb005";
+        case Device::DEV_USB006:
+            return "dev_usb006";
+        case Device::DEV_USB007:
+            return "dev_usb007";
+        case Device::DEV_MS:
+            return "dev_ms";
+        case Device::DEV_CF:
+            return "dev_cf";
+        case Device::DEV_SD:
+            return "dev_sd";
+        case Device::DEV_BDVD:
+            return "dev_bdvd";
+        case Device::APP_HOME:
+            return "app_home";
     }
     return "";
 }
 
 Filesystem::Device Filesystem::stringToDevice(std::string device) {
-    if (device == "dev_flash")          return Device::DEV_FLASH;
-    else if (device == "dev_hdd0")      return Device::DEV_HDD0;
-    else if (device == "dev_hdd1")      return Device::DEV_HDD1;
-    else if (device == "dev_usb000")    return Device::DEV_USB000;
-    else if (device == "dev_usb001")    return Device::DEV_USB001;
-    else if (device == "dev_usb002")    return Device::DEV_USB002;
-    else if (device == "dev_usb003")    return Device::DEV_USB003;
-    else if (device == "dev_usb004")    return Device::DEV_USB004;
-    else if (device == "dev_usb005")    return Device::DEV_USB005;
-    else if (device == "dev_usb006")    return Device::DEV_USB006;
-    else if (device == "dev_usb007")    return Device::DEV_USB007;
-    else if (device == "dev_ms")        return Device::DEV_MS;
-    else if (device == "dev_cf")        return Device::DEV_CF;
-    else if (device == "dev_sd")        return Device::DEV_SD;
-    else if (device == "dev_bdvd")      return Device::DEV_BDVD;
-    else if (device == "app_home")      return Device::APP_HOME;
-    else return Device::INVALID;
+    if (device == "dev_flash")
+        return Device::DEV_FLASH;
+    else if (device == "dev_hdd0")
+        return Device::DEV_HDD0;
+    else if (device == "dev_hdd1")
+        return Device::DEV_HDD1;
+    else if (device == "dev_usb000")
+        return Device::DEV_USB000;
+    else if (device == "dev_usb001")
+        return Device::DEV_USB001;
+    else if (device == "dev_usb002")
+        return Device::DEV_USB002;
+    else if (device == "dev_usb003")
+        return Device::DEV_USB003;
+    else if (device == "dev_usb004")
+        return Device::DEV_USB004;
+    else if (device == "dev_usb005")
+        return Device::DEV_USB005;
+    else if (device == "dev_usb006")
+        return Device::DEV_USB006;
+    else if (device == "dev_usb007")
+        return Device::DEV_USB007;
+    else if (device == "dev_ms")
+        return Device::DEV_MS;
+    else if (device == "dev_cf")
+        return Device::DEV_CF;
+    else if (device == "dev_sd")
+        return Device::DEV_SD;
+    else if (device == "dev_bdvd")
+        return Device::DEV_BDVD;
+    else if (device == "app_home")
+        return Device::APP_HOME;
+    else
+        return Device::INVALID;
 }

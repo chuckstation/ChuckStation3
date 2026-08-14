@@ -1,7 +1,7 @@
-#include <Modules/SysPrxForUser.hpp>
 #include "PlayStation3.hpp"
-#include <OS/Syscalls/sys_spu.hpp>
 
+#include <Modules/SysPrxForUser.hpp>
+#include <OS/Syscalls/sys_spu.hpp>
 
 using namespace sys_spu;
 
@@ -26,9 +26,11 @@ u64 SysPrxForUser::sysStrlen() {
 }
 
 u64 SysPrxForUser::sysGetSystemTime() {
-    //log("sysGetSystemTime()\n");
+    // log("sysGetSystemTime()\n");
 
-    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+               std::chrono::high_resolution_clock::now().time_since_epoch())
+        .count();
 }
 
 u64 SysPrxForUser::sysProcess_At_ExitSpawn() {
@@ -53,8 +55,8 @@ u64 SysPrxForUser::sysProcessIsStack() {
 }
 
 u64 SysPrxForUser::sysPrintf() {
-    const u32 fmt_ptr = ARG0;
-    const auto fmt = Helpers::readString(ps3->mem.getPtr(fmt_ptr));
+    const u32  fmt_ptr = ARG0;
+    const auto fmt     = Helpers::readString(ps3->mem.getPtr(fmt_ptr));
     printf("%s", fmt.c_str());
     return CELL_OK;
 }
@@ -69,8 +71,7 @@ u64 SysPrxForUser::sysStrcat() {
         str_start++;
 
     for (int i = 0;; i++) {
-        if (!(ps3->mem.getPtr(str_start)[i] = ps3->mem.getPtr(src)[i]))
-        {
+        if (!(ps3->mem.getPtr(str_start)[i] = ps3->mem.getPtr(src)[i])) {
             return dst;
         }
     }
@@ -89,8 +90,7 @@ u64 SysPrxForUser::sysStrncat() {
         str_start++;
 
     for (int i = 0; i < max; i++) {
-        if (!(ps3->mem.getPtr(str_start)[i] = ps3->mem.getPtr(src)[i]))
-        {
+        if (!(ps3->mem.getPtr(str_start)[i] = ps3->mem.getPtr(src)[i])) {
             return dst;
         }
     }
@@ -143,8 +143,8 @@ u64 SysPrxForUser::sysSpinlockUnlock() {
 }
 
 u64 SysPrxForUser::sysMemset() {
-    const u32 dst = ARG0;
-    const u32 val = ARG1;
+    const u32 dst  = ARG0;
+    const u32 val  = ARG1;
     const u32 size = ARG2;
     log("_sys_memset(dst: 0x%08x, val: 0x%08x, size: 0x%08x)\n", dst, val, size);
 
@@ -153,8 +153,8 @@ u64 SysPrxForUser::sysMemset() {
 }
 
 u64 SysPrxForUser::sysMemcpy() {
-    const u32 dst = ARG0;
-    const u32 src = ARG1;
+    const u32 dst  = ARG0;
+    const u32 src  = ARG1;
     const u32 size = ARG2;
     log("_sys_memcpy(dst: 0x%08x, src: 0x%08x, size: 0x%08x)\n", dst, src, size);
 
@@ -191,12 +191,12 @@ u64 SysPrxForUser::sysMemcmp() {
 
 u64 SysPrxForUser::sys_spu_image_import() {
     const u32 image_ptr = ARG0;
-    const u32 src = ARG1;
-    const u32 type = ARG2;
+    const u32 src       = ARG1;
+    const u32 type      = ARG2;
     log("sys_spu_image_import(image_ptr: 0x%08x, src: 0x%08x, type: 0x%08x)\n", image_ptr, src, type);
-    
-    SPULoader loader = SPULoader(ps3);
-    sys_spu_image* image = (sys_spu_image*)ps3->mem.getPtr(image_ptr);
+
+    SPULoader      loader = SPULoader(ps3);
+    sys_spu_image* image  = (sys_spu_image*)ps3->mem.getPtr(image_ptr);
     loader.load(src, image);
 
     return CELL_OK;

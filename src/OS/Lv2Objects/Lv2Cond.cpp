@@ -1,6 +1,6 @@
-#include <Lv2Objects/Lv2Cond.hpp>
 #include "PlayStation3.hpp"
 
+#include <Lv2Objects/Lv2Cond.hpp>
 
 bool Lv2Cond::signal() {
     Lv2Mutex* mtx = ps3->lv2_obj.get<Lv2Mutex>(mutex_id);
@@ -14,7 +14,8 @@ bool Lv2Cond::signal() {
         // Temporarily switch to the other thread to lock the mutex
         const auto curr_thread = ps3->thread_manager.getCurrentThread()->id;
         ps3->thread_manager.contextSwitch(*t);
-        if (!mtx->lock()) Helpers::panic("Lv2Cond::signal: mutex error\n");
+        if (!mtx->lock())
+            Helpers::panic("Lv2Cond::signal: mutex error\n");
         ps3->thread_manager.contextSwitch(*ps3->thread_manager.getThreadByID(curr_thread));
     }
 
@@ -34,7 +35,8 @@ bool Lv2Cond::signalAll() {
         // Temporarily switch to the other thread to lock the mutex
         const auto curr_thread = ps3->thread_manager.getCurrentThread()->id;
         ps3->thread_manager.contextSwitch(*t);
-        if (!mtx->lock()) Helpers::panic("Lv2Cond::signalAll: mutex error\n");
+        if (!mtx->lock())
+            Helpers::panic("Lv2Cond::signalAll: mutex error\n");
         ps3->thread_manager.contextSwitch(*ps3->thread_manager.getThreadByID(curr_thread));
     }
 
@@ -42,8 +44,8 @@ bool Lv2Cond::signalAll() {
 }
 
 bool Lv2Cond::wait() {
-    Lv2Mutex* mtx = ps3->lv2_obj.get<Lv2Mutex>(mutex_id);
-    Thread* curr_thread = ps3->thread_manager.getCurrentThread();
+    Lv2Mutex* mtx         = ps3->lv2_obj.get<Lv2Mutex>(mutex_id);
+    Thread*   curr_thread = ps3->thread_manager.getCurrentThread();
 
     // Check if the current thread is the owner of the mutex
     if (mtx->owner != curr_thread->id)
@@ -55,6 +57,7 @@ bool Lv2Cond::wait() {
     // Release the mutex while we are waiting
     mtx->unlock();
 
-    //printf("Thread %d \"%s\" is waiting on cond variable \"%s\"...\n", curr_thread->id, curr_thread->name.c_str(), name.c_str());
+    // printf("Thread %d \"%s\" is waiting on cond variable \"%s\"...\n", curr_thread->id, curr_thread->name.c_str(),
+    // name.c_str());
     return true;
 }

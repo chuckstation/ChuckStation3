@@ -1,7 +1,10 @@
 #include <Null/NullDevice.hpp>
 
-
-void NullDevice::init() {}
-void NullDevice::end() {}
-void NullDevice::setChannels(int n_channels) {}
-void NullDevice::pushAudio(float *ptr, size_t n_samples) {}
+void NullDevice::init() {
+}
+void NullDevice::end() {
+}
+void NullDevice::setChannels(int n_channels) {
+}
+void NullDevice::pushAudio(float* ptr, size_t n_samples) {
+}
