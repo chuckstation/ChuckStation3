@@ -1,4 +1,4 @@
-#include "MiniaudioDevice.hpp"
+#include <miniaudio/MiniaudioDevice.hpp>
 #include <chrono>
 #include <thread>
 

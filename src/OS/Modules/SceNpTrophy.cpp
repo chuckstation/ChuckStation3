@@ -1,4 +1,4 @@
-#include "SceNpTrophy.hpp"
+#include <Modules/SceNpTrophy.hpp>
 #include "PlayStation3.hpp"
 
 

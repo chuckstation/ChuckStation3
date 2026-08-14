@@ -1,4 +1,4 @@
-#include "SFOLoader.hpp"
+#include <SFO/SFOLoader.hpp>
 
 
 SFOLoader::SFOData SFOLoader::parse(fs::path guest_path) {

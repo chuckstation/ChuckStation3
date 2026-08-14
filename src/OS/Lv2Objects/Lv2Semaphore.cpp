@@ -1,4 +1,4 @@
-#include "Lv2Semaphore.hpp"
+#include <Lv2Objects/Lv2Semaphore.hpp>
 #include "PlayStation3.hpp"
 
 

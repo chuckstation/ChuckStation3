@@ -1,5 +1,5 @@
-#include "Lv2SPUThreadGroup.hpp"
-#include "Lv2EventQueue.hpp"
+#include <Lv2Objects/Lv2SPUThreadGroup.hpp>
+#include <Lv2Objects/Lv2EventQueue.hpp>
 #include "PlayStation3.hpp"
 
 

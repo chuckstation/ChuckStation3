@@ -1,4 +1,4 @@
-#include "PRXLoader.hpp"
+#include <PRX/PRXLoader.hpp>
 #include "PlayStation3.hpp"
 
 

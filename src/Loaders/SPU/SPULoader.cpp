@@ -1,5 +1,5 @@
 #include <Loaders/ELF/ELFLoader.hpp>
-#include "SPULoader.hpp"
+#include <SPU/SPULoader.hpp>
 #include "PlayStation3.hpp"
 
 

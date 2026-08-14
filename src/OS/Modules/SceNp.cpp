@@ -1,4 +1,4 @@
-#include "SceNp.hpp"
+#include <Modules/SceNp.hpp>
 #include "PlayStation3.hpp"
 
 

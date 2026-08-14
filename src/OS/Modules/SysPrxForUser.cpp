@@ -1,4 +1,4 @@
-#include "SysPrxForUser.hpp"
+#include <Modules/SysPrxForUser.hpp>
 #include "PlayStation3.hpp"
 #include <OS/Syscalls/sys_spu.hpp>
 

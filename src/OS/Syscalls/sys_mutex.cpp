@@ -1,4 +1,4 @@
-#include "sys_mutex.hpp"
+#include <Syscalls/sys_mutex.hpp>
 #include <Syscall.hpp>
 #include "PlayStation3.hpp"
 

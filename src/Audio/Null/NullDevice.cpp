@@ -1,4 +1,4 @@
-#include "NullDevice.hpp"
+#include <Null/NullDevice.hpp>
 
 
 void NullDevice::init() {}

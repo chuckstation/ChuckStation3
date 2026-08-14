@@ -3,7 +3,7 @@
 #include <SPU/SPULoader.hpp>
 #include <Lv2Objects/Lv2SPUThreadGroup.hpp>
 #include <Lv2Objects/Lv2EventQueue.hpp>
-#include "sys_spu.hpp"
+#include <Syscalls/sys_spu.hpp>
 
 
 MAKE_LOG_FUNCTION(log_sys_spu, sys_spu);

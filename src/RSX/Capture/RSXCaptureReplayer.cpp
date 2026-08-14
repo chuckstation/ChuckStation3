@@ -1,4 +1,4 @@
-#include "RSXCaptureReplayer.hpp"
+#include <Capture/RSXCaptureReplayer.hpp>
 #include "PlayStation3.hpp"
 
 

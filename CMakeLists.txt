@@ -162,8 +162,8 @@ target_include_directories(chuckstation3_core PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
-# Third-party includes are PRIVATE — they don't leak into the public API.
-target_include_directories(chuckstation3_core PRIVATE
+# Third-party includes — exposed as PUBLIC so consumer targets can find headers (e.g. BitField.hpp).
+target_include_directories(chuckstation3_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/ELFIO"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/Dolphin"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/OpenGL"

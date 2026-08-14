@@ -53,8 +53,8 @@
         "CMAKE_BUILD_TYPE": "Release"
       },
       "condition": {
-        "type": "envEquals",
-        "lhs": "ANDROID_NDK_HOME",
+        "type": "notEquals",
+        "lhs": "$env{ANDROID_NDK_HOME}",
         "rhs": ""
       }
     },

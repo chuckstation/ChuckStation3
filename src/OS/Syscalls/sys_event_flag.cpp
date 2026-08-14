@@ -1,5 +1,5 @@
 #include <Syscall.hpp>
-#include "sys_event.hpp"
+#include <Syscalls/sys_event.hpp>
 #include "PlayStation3.hpp"
 #include "Lv2Objects/Lv2EventFlag.hpp"
 
