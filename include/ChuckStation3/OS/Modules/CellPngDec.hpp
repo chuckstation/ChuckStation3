@@ -1,12 +1,10 @@
 #pragma once
 
-#include <common.hpp>
-#include <logger.hpp>
 #include <BEField.hpp>
-
 #include <CellTypes.hpp>
-
+#include <common.hpp>
 #include <lodepng.h>
+#include <logger.hpp>
 
 // Circular dependency
 class PlayStation3;
@@ -19,7 +17,6 @@ class CellPngDec {
 public:
     CellPngDec(PlayStation3* ps3) : ps3(ps3) {}
     PlayStation3* ps3;
-
 
     struct CellPngDecSrc {
         BEField<u32> src_sel;
@@ -105,7 +102,7 @@ public:
     };
 
     enum CellPngDecStreamSrcSel : u32 {
-        CELL_PNGDEC_FILE = 0,
+        CELL_PNGDEC_FILE   = 0,
         CELL_PNGDEC_BUFFER = 1,
     };
 
@@ -114,19 +111,19 @@ public:
     };
 
     enum CellPngDecColorSpace : s32 {
-        CELL_PNGDEC_GRAYSCALE = 1,
-        CELL_PNGDEC_RGB = 2,
-        CELL_PNGDEC_PALETTE = 4,
+        CELL_PNGDEC_GRAYSCALE       = 1,
+        CELL_PNGDEC_RGB             = 2,
+        CELL_PNGDEC_PALETTE         = 4,
         CELL_PNGDEC_GRAYSCALE_ALPHA = 9,
-        CELL_PNGDEC_RGBA = 10,
-        CELL_PNGDEC_ARGB = 20,
+        CELL_PNGDEC_RGBA            = 10,
+        CELL_PNGDEC_ARGB            = 20,
     };
 
-    CellPngDecSrcLE curr_src;
-    CellPngDecInfoLE curr_info;
+    CellPngDecSrcLE      curr_src;
+    CellPngDecInfoLE     curr_info;
     CellPngDecOutParamLE out_param;
-    fs::path curr_file;
-    std::vector<u8> buf;
+    fs::path             curr_file;
+    std::vector<u8>      buf;
 
     void displayPNGInfo(const LodePNGInfo& info);
 

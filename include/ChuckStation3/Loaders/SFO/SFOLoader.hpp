@@ -1,13 +1,10 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <Filesystem/Filesystem.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
 #include <unordered_map>
-
-#include <Filesystem/Filesystem.hpp>
-
 
 class SFOLoader {
 public:
@@ -16,11 +13,11 @@ public:
 
     struct SFOData {
         std::unordered_map<std::string, std::u8string> strings;
-        std::unordered_map<std::string, u32> ints;
+        std::unordered_map<std::string, u32>           ints;
     };
 
     SFOData parse(fs::path guest_path);
-    void save(fs::path guest_path, SFOData& sfo_data);
+    void    save(fs::path guest_path, SFOData& sfo_data);
 
     struct SFOHeader {
         u32 magic; // Always " PSF"

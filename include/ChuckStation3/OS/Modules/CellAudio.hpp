@@ -1,15 +1,12 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
+#include <atomic>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <thread>
 #include <mutex>
-#include <atomic>
-
-#include <CellTypes.hpp>
-
+#include <thread>
 
 // Circular dependency
 class PlayStation3;
@@ -19,7 +16,7 @@ using namespace CellTypes;
 static constexpr u64 CELL_AUDIO_PORT_2CH = 2;
 static constexpr u64 CELL_AUDIO_PORT_8CH = 8;
 
-static constexpr u64 CELL_AUDIO_BLOCK_8  =  8;
+static constexpr u64 CELL_AUDIO_BLOCK_8  = 8;
 static constexpr u64 CELL_AUDIO_BLOCK_16 = 16;
 static constexpr u64 CELL_AUDIO_BLOCK_32 = 32;
 
@@ -32,14 +29,15 @@ static constexpr u32 CELL_AUDIO_ERROR_ALREADY_INIT = 0x80310701;
 class CellAudio {
 public:
     CellAudio(PlayStation3* ps3) : ps3(ps3) {
-        for (int i = 0; i < 8; i++) ports[i].id = i;
+        for (int i = 0; i < 8; i++)
+            ports[i].id = i;
     }
     PlayStation3* ps3;
 
     struct CellAudioPortParam {
-        BEField<u64> n_channels;
-        BEField<u64> n_blocks;
-        BEField<u64> attr;
+        BEField<u64>   n_channels;
+        BEField<u64>   n_blocks;
+        BEField<u64>   attr;
         BEField<float> level;
     };
 
@@ -53,26 +51,26 @@ public:
     };
 
     struct Port {
-        u32 id = -1;
-        u32 idx = 0;
-        u32 status = CELL_AUDIO_STATUS_CLOSE;
+        u32 id         = -1;
+        u32 idx        = 0;
+        u32 status     = CELL_AUDIO_STATUS_CLOSE;
         u64 n_channels = 0;
-        u64 n_blocks = 0;
-        u32 addr = 0;
-        u32 size = 0;
+        u64 n_blocks   = 0;
+        u32 addr       = 0;
+        u32 size       = 0;
     };
 
     static constexpr u64 EVENT_QUEUE_KEY = 0x1234A1BE1234A1BE;
 
     bool initialized = false;
-    u32 equeue_id = 0;
+    u32  equeue_id   = 0;
     Port ports[8];
-    u32 read_positions_addr;
-    
-    std::mutex audio_mutex;
+    u32  read_positions_addr;
+
+    std::mutex  audio_mutex;
     std::thread audio_thread;
-    void audioThread();
-    void endAudioThread();
+    void        audioThread();
+    void        endAudioThread();
 
     u64 cellAudioCreateNotifyEventQueue();
     u64 cellAudioPortClose();

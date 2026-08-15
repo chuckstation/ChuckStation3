@@ -2,10 +2,9 @@
 
 #include <common.hpp>
 
-
 struct PRXExport {
     u32 addr;
-    //u32 toc;
+    // u32 toc;
 };
 
 struct PRXExportTable {

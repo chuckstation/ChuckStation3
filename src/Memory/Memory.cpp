@@ -1,12 +1,11 @@
 #include "Memory.hpp"
 
-
-//#define DISABLE_FASTMEM_FOR_ALLOCATED_MEM
+// #define DISABLE_FASTMEM_FOR_ALLOCATED_MEM
 
 // Allocates size bytes of physical memory. Returns physical address of the allocated memory.
 MemoryRegion::Block* MemoryRegion::allocPhys(size_t size, bool system) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     // Page alignment
     size_t aligned_size = pageAlign(size);
     // Find the next free block of memory big enough for the given size
@@ -17,15 +16,13 @@ MemoryRegion::Block* MemoryRegion::allocPhys(size_t size, bool system) {
             if (next_block.second->start - addr >= aligned_size) {
                 // addr OK
                 break;
-            }
-            else {
+            } else {
                 // Keep searching
                 addr = next_block.second->start + next_block.second->size;
                 if (addr >= RAM_SIZE)
                     Helpers::panic("Out of memory\n");
             }
-        }
-        else {
+        } else {
             // addr OK
             break;
         }
@@ -36,15 +33,16 @@ MemoryRegion::Block* MemoryRegion::allocPhys(size_t size, bool system) {
         Helpers::panic("Out of memory\n");
 
     // Allocate block
-    blocks.push_back({ addr, aligned_size, 0, system });
+    blocks.push_back({addr, aligned_size, 0, system});
 
     return &blocks.back();
 }
 
-// Allocates and maps size bytes of memory. Returns virtual address of allocated memory. Marks allocated area as fastmem. Optionally specify the lowest possible virtual address to allocate.
+// Allocates and maps size bytes of memory. Returns virtual address of allocated memory. Marks allocated area as
+// fastmem. Optionally specify the lowest possible virtual address to allocate.
 MemoryRegion::MapEntry* MemoryRegion::alloc(size_t size, u64 start_addr, bool system, u64 alignment) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     // Page alignment
     size_t aligned_size = pageAlign(size);
     // Allocate block of memory
@@ -55,9 +53,9 @@ MemoryRegion::MapEntry* MemoryRegion::alloc(size_t size, u64 start_addr, bool sy
 #else
     constexpr bool fastmem = true;
 #endif
-    
+
     // Map area
-    u64 vaddr = findNextAllocatableVaddr(size, start_addr, alignment);
+    u64       vaddr = findNextAllocatableVaddr(size, start_addr, alignment);
     MapEntry* entry = mmap(vaddr, paddr, aligned_size, fastmem);
 
     log("Allocated 0x%08llx bytes at 0x%016llx\n", aligned_size, vaddr);
@@ -67,14 +65,16 @@ MemoryRegion::MapEntry* MemoryRegion::alloc(size_t size, u64 start_addr, bool sy
 // Returns whether or not it's possible to allocate size bytes.
 bool MemoryRegion::canAlloc(size_t size) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
-    if (getAvailableMem() < size) return false;
-    else return true;
+
+    if (getAvailableMem() < size)
+        return false;
+    else
+        return true;
 }
 
 void MemoryRegion::free(MemoryRegion::MapEntry* entry) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     // Get the block this entry is mapped to
     auto block = findBlockFromAddr(entry->paddr);
     // Free the block
@@ -90,7 +90,7 @@ void MemoryRegion::free(MemoryRegion::MapEntry* entry) {
 
 void MemoryRegion::freePhys(MemoryRegion::Block* block) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     // Remove block
     for (int i = 0; i < blocks.size(); i++) {
         if (blocks[i].start == block->start) {
@@ -100,16 +100,19 @@ void MemoryRegion::freePhys(MemoryRegion::Block* block) {
     }
 }
 
-// Returns whether the given physical address is part of an allocated memory block and, in case it is, returns the block info.
+// Returns whether the given physical address is part of an allocated memory block and, in case it is, returns the block
+// info.
 std::pair<bool, MemoryRegion::Block*> MemoryRegion::findBlockFromAddr(u64 paddr) {
     for (auto& i : blocks) {
-        if (Helpers::inRange<u32>(paddr, i.start, i.start + i.size - 1)) return { true, &i };
+        if (Helpers::inRange<u32>(paddr, i.start, i.start + i.size - 1))
+            return {true, &i};
     }
 
-    return { false, nullptr };
+    return {false, nullptr};
 }
 
-// Returns whether there is an allocated memory block after the given physical address and, in case there is, returns the block info.
+// Returns whether there is an allocated memory block after the given physical address and, in case there is, returns
+// the block info.
 std::pair<bool, MemoryRegion::Block*> MemoryRegion::findNextBlock(u64 start_addr) {
     Block* block = nullptr;
     for (auto& i : blocks) {
@@ -121,22 +124,23 @@ std::pair<bool, MemoryRegion::Block*> MemoryRegion::findNextBlock(u64 start_addr
         }
     }
 
-    return { block != nullptr, block };
+    return {block != nullptr, block};
 }
 
-// Returns whether there is an allocated block in the physical address space with the given handle and, in case there is, returns the block info.
+// Returns whether there is an allocated block in the physical address space with the given handle and, in case there
+// is, returns the block info.
 std::pair<bool, MemoryRegion::Block*> MemoryRegion::findBlockWithHandle(u64 handle) {
     for (auto& i : blocks) {
         if (i.handle == handle)
-            return { true, &i };
+            return {true, &i};
     }
-    return { false, nullptr };
+    return {false, nullptr};
 }
 
 // Frees a physical block with the given handle, or does nothing if there is no block with the given handle.
 void MemoryRegion::freeBlockWithHandle(u64 handle) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     // Get the block
     auto block = findBlockWithHandle(handle);
     // Remove the block
@@ -148,7 +152,8 @@ void MemoryRegion::freeBlockWithHandle(u64 handle) {
     }
 }
 
-// Returns whether there is a mapped area in the virtual address space after the given virtual address and, in case there is, returns the map info.
+// Returns whether there is a mapped area in the virtual address space after the given virtual address and, in case
+// there is, returns the map info.
 std::pair<bool, MemoryRegion::MapEntry*> MemoryRegion::findNextMappedArea(u64 start_addr) {
     MapEntry* map_entry = nullptr;
     for (auto& i : map) {
@@ -160,70 +165,70 @@ std::pair<bool, MemoryRegion::MapEntry*> MemoryRegion::findNextMappedArea(u64 st
         }
     }
 
-    return { map_entry != nullptr, map_entry };
+    return {map_entry != nullptr, map_entry};
 }
 
-// Returns the first available unmapped region in the virtual address space big enough to fit size bytes, or 0 if there is none.
+// Returns the first available unmapped region in the virtual address space big enough to fit size bytes, or 0 if there
+// is none.
 u64 MemoryRegion::findNextAllocatableVaddr(size_t size, u64 start_addr, u64 alignment) {
-    auto align = [](u64 val, u64 alignment) -> u64 {
-        return (val + alignment - 1) & ~(alignment - 1);
-    };
-    
-    u64 vaddr = (start_addr == 0) ? virtual_base : start_addr;
-    vaddr = align(vaddr, alignment);
+    auto align = [](u64 val, u64 alignment) -> u64 { return (val + alignment - 1) & ~(alignment - 1); };
+
+    u64 vaddr        = (start_addr == 0) ? virtual_base : start_addr;
+    vaddr            = align(vaddr, alignment);
     u64 aligned_size = pageAlign(size);
 
     // Find the next free area in the address map
-    //log("Searching allocateable area...\n");
+    // log("Searching allocateable area...\n");
     while (true) {
         auto next_area = findNextMappedArea(vaddr);
-        //log("0x%016llx (next area at 0x%016llx, spacing: 0x%016llx)...", vaddr, next_area.second->vaddr, next_area.second->vaddr - vaddr);
+        // log("0x%016llx (next area at 0x%016llx, spacing: 0x%016llx)...", vaddr, next_area.second->vaddr,
+        // next_area.second->vaddr - vaddr);
         if (next_area.first) {
             if (next_area.second->vaddr - vaddr >= aligned_size) {
                 // addr OK
                 break;
-            }
-            else {
+            } else {
                 // Keep searching
                 vaddr = next_area.second->vaddr + next_area.second->size;
                 vaddr = align(vaddr, alignment);
-                //log(" not ok\n");
+                // log(" not ok\n");
             }
-        }
-        else {
+        } else {
             // addr OK
             break;
         }
     }
-    //log(" ok\n");
+    // log(" ok\n");
     return vaddr;
 }
 
-// Returns whether there is a mapped area in the virtual address space with the given handle and, in case there is, returns the map info.
+// Returns whether there is a mapped area in the virtual address space with the given handle and, in case there is,
+// returns the map info.
 std::pair<bool, MemoryRegion::MapEntry*> MemoryRegion::findMapEntryWithHandle(u64 handle) {
     for (auto& i : map) {
         if (i.handle == handle)
-            return { true, &i };
+            return {true, &i};
     }
-    return { false, nullptr };
+    return {false, nullptr};
 }
 
 // Checks if the given virtual address is mapped to a physical address.
 // If it is, also return the map entry.
 std::pair<bool, MemoryRegion::MapEntry*> MemoryRegion::isMapped(u64 vaddr) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     for (auto& i : map) {
-        if (Helpers::inRange<u32>(vaddr, i.vaddr, i.vaddr + i.size - 1)) return { true, &i };
+        if (Helpers::inRange<u32>(vaddr, i.vaddr, i.vaddr + i.size - 1))
+            return {true, &i};
     }
 
-    return { false, nullptr };
+    return {false, nullptr};
 }
 
 // Maps a virtual address to a physical one.
 MemoryRegion::MapEntry* MemoryRegion::mmap(u64 vaddr, u64 paddr, size_t size, bool fastmem) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     if (isMapped(vaddr).first) {
         printAddressMap();
         Helpers::panic("Tried to map an already mapped virtual address at 0x%016llx\n", vaddr);
@@ -232,25 +237,25 @@ MemoryRegion::MapEntry* MemoryRegion::mmap(u64 vaddr, u64 paddr, size_t size, bo
     // Page alignment
     size_t aligned_size = pageAlign(size);
 
-    map.push_back({ vaddr, paddr, aligned_size });
-    
+    map.push_back({vaddr, paddr, aligned_size});
+
     // Fastmem
     if (fastmem) {
         for (u64 page_addr = vaddr; page_addr < vaddr + size; page_addr += PAGE_SIZE) {
             const u64 page = page_addr >> PAGE_SHIFT;
-            u8* ptr = getPtrPhys(paddr);
+            u8*       ptr  = getPtrPhys(paddr);
             mem_manager.markAsFastMem(page, ptr, true, true);
             paddr += PAGE_SIZE;
         }
     }
-    
+
     return &map.back();
 }
 
 // Unmaps the region starting at the given virtual address.
 void MemoryRegion::unmap(u64 vaddr) {
     std::lock_guard<std::recursive_mutex> lock(mutex);
-    
+
     for (int i = 0; i < map.size(); i++) {
         if (map[i].vaddr == vaddr) {
             map.erase(map.begin() + i);
@@ -278,34 +283,39 @@ u8* MemoryRegion::getPtrPhys(u64 paddr) {
 u64 MemoryRegion::getAvailableMem() {
     u64 size = 0;
     for (auto& i : blocks) {
-        if (i.system) continue;
+        if (i.system)
+            continue;
         size += i.size;
     }
     return RAM_SIZE - system_size - size;
 }
 
-
-// Returns a pointer to the memory region the address is part of (or nullptr if the address is unmapped), and an offset into the aforementioned memory (or 0 if the address is unmapped).
+// Returns a pointer to the memory region the address is part of (or nullptr if the address is unmapped), and an offset
+// into the aforementioned memory (or 0 if the address is unmapped).
 std::pair<u64, u8*> Memory::addrToOffsetInMemory(u64 vaddr) {
     for (auto& i : regions) {
         if (i->isMapped(vaddr).first) {
-            return { i->translateAddr(vaddr), i->mem };
+            return {i->translateAddr(vaddr), i->mem};
         }
     }
 
-    return { 0, nullptr };
+    return {0, nullptr};
 }
 
 // Marks a page of memory as fastmem
 void Memory::markAsFastMem(u64 page, u8* ptr, bool r, bool w) {
-    if (r) read_table[page] = ptr;
-    if (w) write_table[page] = ptr;
+    if (r)
+        read_table[page] = ptr;
+    if (w)
+        write_table[page] = ptr;
 }
 
 // Marks a page of memory as slowmem (removes it from the fastmem page table)
 void Memory::markAsSlowMem(u64 page, bool r, bool w) {
-    if (r) read_table[page] = 0;
-    if (w) write_table[page] = 0;
+    if (r)
+        read_table[page] = 0;
+    if (w)
+        write_table[page] = 0;
 }
 
 // Returns a pointer to the data at the specified virtual address
@@ -322,17 +332,17 @@ u8* Memory::getPtr(u64 vaddr) {
 // also be contiguous in physical memory, so a normal memcpy wouldn't always work.
 void Memory::copyTo(u64 dst, u8* src, size_t size) {
     // Copy up to PAGE_SIZE at max, split into multiple copies if larger
-    u64 cur_dst = dst;
-    u8* cur_src = src;
+    u64 cur_dst        = dst;
+    u8* cur_src        = src;
     u64 size_remaining = size;
-    
+
     // Make the first copy copy up to page boundary, so that the next copies are page aligned
     const u64 to_copy = std::min(size_remaining, ram.pageAlign(cur_dst) - cur_dst);
     std::memcpy(getPtr(cur_dst), cur_src, to_copy);
     size_remaining -= to_copy;
     cur_dst += to_copy;
     cur_src += to_copy;
-    
+
     while (size_remaining > 0) {
         const u64 to_copy = std::min(PAGE_SIZE, size_remaining);
         std::memcpy(getPtr(cur_dst), cur_src, to_copy);
@@ -344,17 +354,17 @@ void Memory::copyTo(u64 dst, u8* src, size_t size) {
 
 void Memory::copyFrom(u8* dst, u64 src, size_t size) {
     // Copy up to PAGE_SIZE at max, split into multiple copies if larger
-    u8* cur_dst = dst;
-    u64 cur_src = src;
+    u8* cur_dst        = dst;
+    u64 cur_src        = src;
     u64 size_remaining = size;
-    
+
     // Make the first copy copy up to page boundary, so that the next copies are page aligned
     const u64 to_copy = std::min(size_remaining, ram.pageAlign(cur_src) - cur_src);
     std::memcpy(cur_dst, getPtr(cur_src), to_copy);
     size_remaining -= to_copy;
     cur_dst += to_copy;
     cur_src += to_copy;
-    
+
     while (size_remaining > 0) {
         const u64 to_copy = std::min(PAGE_SIZE, size_remaining);
         std::memcpy(cur_dst, getPtr(cur_src), to_copy);
@@ -371,13 +381,13 @@ void Memory::reserveAddress(u64 vaddr) {
 
 // Creates a reservation for the given virtual address and thread id.
 void Memory::reserveAddress(u64 vaddr, size_t size, u64 thread_id) {
-    //printf("Thread %d reserved address 0x%08x\n", thread_id, vaddr);
+    // printf("Thread %d reserved address 0x%08x\n", thread_id, vaddr);
     Helpers::debugAssert(size <= sizeof(u64), "Reservation with size above 64 bits");
 
     Reservation reservation;
-    reservation.vaddr = vaddr;
+    reservation.vaddr     = vaddr;
     reservation.thread_id = thread_id;
-    reservation.size = size;
+    reservation.size      = size;
     std::memcpy(&reservation.data, getPtr(vaddr), size);
     reservations[vaddr] = reservation;
 }
@@ -391,12 +401,12 @@ bool Memory::acquireReservation(u64 vaddr) {
 bool Memory::acquireReservation(u64 vaddr, u64 thread_id) {
     if (reservations.contains(vaddr)) {
         if (reservations[vaddr].thread_id == thread_id) {
-            //printf("Thread %d successfully acquired reservation 0x%08x\n", thread_id, vaddr);
+            // printf("Thread %d successfully acquired reservation 0x%08x\n", thread_id, vaddr);
             reservations.erase(vaddr);
             return true;
         }
     }
-    //printf("Thread %d failed to acquire reservation 0x%08x\n", thread_id, vaddr);
+    // printf("Thread %d failed to acquire reservation 0x%08x\n", thread_id, vaddr);
     return false;
 }
 
@@ -412,7 +422,7 @@ bool Memory::isAddressReserved(u64 vaddr) {
     return reservations.contains(vaddr);
 }
 
-template<typename T>
+template <typename T>
 T Memory::read(u64 vaddr) {
     const u64 page = vaddr >> PAGE_SHIFT;
     const u64 offs = vaddr & PAGE_MASK;
@@ -434,26 +444,27 @@ T Memory::read(u64 vaddr) {
         auto [offset, mem] = addrToOffsetInMemory(vaddr);
         Helpers::debugAssert(mem != nullptr, "Tried to read unmapped vaddr 0x%016llx\n", vaddr);
         T data;
-        
+
         if (watchpoints_r.contains(vaddr))
             watchpoints_r[vaddr](vaddr);
 
         std::memcpy(&data, &mem[offset], sizeof(T));
-        
+
 #ifdef TRACK_UNWRITTEN_READS
         auto check_data = [this](u32 addr, u64 data) {
             if (written_addresses.contains(addr)) {
                 const auto written = written_addresses[addr];
                 if (written != data)
                     printf("Data mismatch: last recorded value was 0x%x but 0x%x was read\n", written, data);
-            } else printf("Read 0x%0x from unwritten address 0x%08x\n", data, addr);
+            } else
+                printf("Read 0x%0x from unwritten address 0x%08x\n", data, addr);
         };
 
         data = Helpers::bswap<T>(data);
         check_data(vaddr, data);
         return data;
 #endif
-        
+
         return Helpers::bswap<T>(data);
     }
 }
@@ -462,14 +473,14 @@ template u16 Memory::read(u64 vaddr);
 template u32 Memory::read(u64 vaddr);
 template u64 Memory::read(u64 vaddr);
 
-template<typename T>
+template <typename T>
 void Memory::write(u64 vaddr, T data) {
 #ifdef TRACK_UNWRITTEN_READS
     written_addresses[vaddr] = data;
 #endif
-    
+
     data = Helpers::bswap<T>(data);
-    
+
     const u64 page = vaddr >> PAGE_SHIFT;
     const u64 offs = vaddr & PAGE_MASK;
 
@@ -494,7 +505,7 @@ void Memory::write(u64 vaddr, T data) {
             watchpoints_w[vaddr](vaddr);
     }
 }
-template void Memory::write(u64 vaddr, u8  data);
+template void Memory::write(u64 vaddr, u8 data);
 template void Memory::write(u64 vaddr, u16 data);
 template void Memory::write(u64 vaddr, u32 data);
 template void Memory::write(u64 vaddr, u64 data);

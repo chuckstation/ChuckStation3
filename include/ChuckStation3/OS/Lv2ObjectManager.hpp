@@ -1,11 +1,9 @@
 #pragma once
 
-#include <common.hpp>
-
-#include <Lv2Object.hpp>
-#include <Lv2Base.hpp>
 #include <HandleManager.hpp>
-
+#include <Lv2Base.hpp>
+#include <Lv2Object.hpp>
+#include <common.hpp>
 
 // Circular dependency
 class PlayStation3;
@@ -16,13 +14,14 @@ public:
         // Avoid reallocations
         objs.reserve(10240);
     }
-    PlayStation3* ps3;
+    PlayStation3*  ps3;
     HandleManager* handle_manager;
 
-    template<typename T> requires std::is_base_of_v<Lv2Base, T>
+    template <typename T>
+        requires std::is_base_of_v<Lv2Base, T>
     T* create() {
-        const auto handle = handle_manager->request();
-        Lv2Object new_obj = Lv2Object(handle, ps3);
+        const auto handle  = handle_manager->request();
+        Lv2Object  new_obj = Lv2Object(handle, ps3);
         objs.push_back(new_obj);
         objs.back().create<T>();
 
@@ -30,7 +29,8 @@ public:
         return objs.back().get<T>();
     };
 
-    template<typename T> requires std::is_base_of_v<Lv2Base, T>
+    template <typename T>
+        requires std::is_base_of_v<Lv2Base, T>
     T* get(u64 handle) {
         for (auto& i : objs) {
             if (i.handle == handle)

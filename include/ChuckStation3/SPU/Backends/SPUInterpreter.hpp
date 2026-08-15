@@ -1,46 +1,44 @@
 #pragma once
 
 #include <SPU.hpp>
-
-#include <functional>
 #include <cmath>
+#include <functional>
 #if _MSC_VER
 #include <intrin.h>
 #pragma intrinsic(_mul128)
 #endif
-
 
 // Circular dependency
 class PlayStation3;
 
 using namespace SPUTypes;
 
-static constexpr u32 INSTR_BITS = 11;
+static constexpr u32 INSTR_BITS       = 11;
 static constexpr u32 INSTR_TABLE_SIZE = 1 << INSTR_BITS;
-static constexpr u32 INSTR_MASK = INSTR_TABLE_SIZE - 1;
+static constexpr u32 INSTR_MASK       = INSTR_TABLE_SIZE - 1;
 
 class SPUInterpreter : public SPU {
 public:
     SPUInterpreter(PlayStation3* ps3);
-    int step() override;
+    int  step() override;
     bool should_break = false;
 
-    template<typename T, int l>
+    template <typename T, int l>
     T ext(T v) {
         return (T)(v << ((sizeof(T) * 8) - l)) >> ((sizeof(T) * 8) - l);
     }
 
-    template<typename T>
+    template <typename T>
     inline bool isShOK(int v) {
         return !(v >= sizeof(T) * 8);
     }
 
-    template<typename T>
+    template <typename T>
     inline T safeShl(T v, int sh) {
         return isShOK<T>(sh) ? (v << sh) : 0;
     }
 
-    template<typename T>
+    template <typename T>
     inline T safeShr(T v, int sh) {
         return isShOK<T>(sh) ? (v >> sh) : 0;
     }

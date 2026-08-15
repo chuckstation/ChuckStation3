@@ -1,13 +1,10 @@
 #pragma once
 
-#include <common.hpp>
-#include <logger.hpp>
 #include <BEField.hpp>
-
-#include <functional>
-
 #include <CellTypes.hpp>
-
+#include <common.hpp>
+#include <functional>
+#include <logger.hpp>
 
 // Circular dependency
 class PlayStation3;
@@ -24,9 +21,9 @@ public:
     PlayStation3* ps3;
 
     struct CellGcmConfig {
-        BEField<u32> local_addr;    // Pointer to RSX local memory
+        BEField<u32> local_addr; // Pointer to RSX local memory
         BEField<u32> io_addr;
-        BEField<u32> local_size;    // Size of RSX memory
+        BEField<u32> local_size; // Size of RSX memory
         BEField<u32> io_size;
         BEField<u32> memFreq;
         BEField<u32> coreFreq;
@@ -58,43 +55,37 @@ public:
     };
 
     static constexpr u32 tiled_pitches[] = {
-        0x00000000, 0x00000200, 0x00000300, 0x00000400,
-        0x00000500, 0x00000600, 0x00000700, 0x00000800,
-        0x00000A00, 0x00000C00, 0x00000D00, 0x00000E00,
-        0x00001000, 0x00001400, 0x00001800, 0x00001A00,
-        0x00001C00, 0x00002000, 0x00002800, 0x00003000,
-        0x00003400, 0x00003800, 0x00004000, 0x00005000,
-        0x00006000, 0x00006800, 0x00007000, 0x00008000,
-        0x0000A000, 0x0000C000, 0x0000D000, 0x0000E000,
-        0x00010000
-    };
+        0x00000000, 0x00000200, 0x00000300, 0x00000400, 0x00000500, 0x00000600, 0x00000700, 0x00000800, 0x00000A00,
+        0x00000C00, 0x00000D00, 0x00000E00, 0x00001000, 0x00001400, 0x00001800, 0x00001A00, 0x00001C00, 0x00002000,
+        0x00002800, 0x00003000, 0x00003400, 0x00003800, 0x00004000, 0x00005000, 0x00006000, 0x00006800, 0x00007000,
+        0x00008000, 0x0000A000, 0x0000C000, 0x0000D000, 0x0000E000, 0x00010000};
 
-    u32 default_ctx_ptr = 0;    // The ctx ptr passed to cellGcmInitBody
-    u32 ctx_addr = 0;
-    u32 ctrl_addr = 0;
-    CellGcmControl* ctrl = nullptr;
+    u32             default_ctx_ptr = 0; // The ctx ptr passed to cellGcmInitBody
+    u32             ctx_addr        = 0;
+    u32             ctrl_addr       = 0;
+    CellGcmControl* ctrl            = nullptr;
 
     CellGcmConfig gcm_config;
-    u32 dma_ctrl_addr = 0;
-    u32 io_table_ptr = 0;
-    u32 ea_table_ptr = 0;
-    u32 mapping_sizes[4096] = {0};
-    u32 label_addr = 0;
-    u32 buffer_info_addr = 0;
-    u32 reports_addr = 0;
-    u32 flip = 0;
-    u32 flip_callback = 0;
-    u32 vblank_handler = 0;
-    u32 vblank2_handler = 0;
-    u32 user_handler = 0;
-    u32 queue_handler = 0;
-    u32 command_size = 0x20000;
-    u32 segment_size = 0x2000;
-    u32 n_cmd_bufs = 0;
+    u32           dma_ctrl_addr       = 0;
+    u32           io_table_ptr        = 0;
+    u32           ea_table_ptr        = 0;
+    u32           mapping_sizes[4096] = {0};
+    u32           label_addr          = 0;
+    u32           buffer_info_addr    = 0;
+    u32           reports_addr        = 0;
+    u32           flip                = 0;
+    u32           flip_callback       = 0;
+    u32           vblank_handler      = 0;
+    u32           vblank2_handler     = 0;
+    u32           user_handler        = 0;
+    u32           queue_handler       = 0;
+    u32           command_size        = 0x20000;
+    u32           segment_size        = 0x2000;
+    u32           n_cmd_bufs          = 0;
 
     void mapEaIo(u32 ea, u32 io);
     void unmapEaIo(u32 ea, u32 io);
-    u32 addressToOffset(u32 addr, bool& ok);
+    u32  addressToOffset(u32 addr, bool& ok);
     bool isIoOffsMapped(u32 io);
     void printOffsetTable();
 

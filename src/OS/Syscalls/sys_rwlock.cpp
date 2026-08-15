@@ -1,12 +1,12 @@
-#include <Syscall.hpp>
 #include "PlayStation3.hpp"
 
+#include <Syscall.hpp>
 
 MAKE_LOG_FUNCTION(log_sys_rwlock, sys_rwlock);
 
 u64 Syscall::sys_rwlock_create() {
     const u32 rwlock_id_ptr = ARG0;
-    const u32 attr_ptr = ARG1;
+    const u32 attr_ptr      = ARG1;
     log_sys_rwlock("sys_rwlock_create(rwlock_id_ptr: 0x%08x, attr_ptr: 0x%08x)\n", rwlock_id_ptr, attr_ptr);
 
     if (!attr_ptr)
@@ -22,7 +22,7 @@ u64 Syscall::sys_rwlock_create() {
 
 u64 Syscall::sys_rwlock_rlock() {
     const u32 rwlock_id = ARG0;
-    const u64 timeout = ARG1;
+    const u64 timeout   = ARG1;
     log_sys_rwlock("sys_rwlock_rlock(rwlock_id: %d, timeout: 0x%lld)\n", rwlock_id, timeout);
 
     if (!ps3->lv2_obj.exists(rwlock_id))
@@ -49,7 +49,7 @@ u64 Syscall::sys_rwlock_runlock() {
 
 u64 Syscall::sys_rwlock_wlock() {
     const u32 rwlock_id = ARG0;
-    const u64 timeout = ARG1;
+    const u64 timeout   = ARG1;
     log_sys_rwlock("sys_rwlock_wlock(rwlock_id: %d, timeout: 0x%lld)\n", rwlock_id, timeout);
 
     if (!ps3->lv2_obj.exists(rwlock_id))

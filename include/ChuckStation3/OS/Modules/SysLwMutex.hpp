@@ -1,13 +1,12 @@
 #pragma once
 
-#include <common.hpp>
-#include <logger.hpp>
-#include <BEField.hpp>
-
-#include <CellTypes.hpp>
-#include <Lv2Objects/Lv2Mutex.hpp>
 #include "Syscalls/sys_mutex.hpp"
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
+#include <Lv2Objects/Lv2Mutex.hpp>
+#include <common.hpp>
+#include <logger.hpp>
 
 // Circular dependency
 class PlayStation3;
@@ -32,7 +31,7 @@ public:
     struct LwMutexAttrib {
         BEField<u32> protocol;
         BEField<u32> recursive;
-        u8 name[8];
+        u8           name[8];
     };
 
     u64 sysLwMutexCreate();

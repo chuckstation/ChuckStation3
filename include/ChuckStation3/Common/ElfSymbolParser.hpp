@@ -1,14 +1,12 @@
 #pragma once
 
+#include <common.hpp>
 #include <elfio/elfio.hpp>
 #include <filesystem>
 #include <fstream>
 #include <map>
 #include <optional>
 #include <string>
-
-#include <common.hpp>
-
 
 class ElfSymbolParser {
     struct Symbol {
@@ -22,11 +20,11 @@ public:
     ElfSymbolParser(const std::filesystem::path& path) {
         using namespace ELFIO;
 
-        elfio reader;
+        elfio         reader;
         std::ifstream file(path, std::ios::binary);
 
         if (!reader.load(file)) {
-            //printf("ELF Symbol parser failed to load file");
+            // printf("ELF Symbol parser failed to load file");
             return;
         }
 
@@ -39,12 +37,12 @@ public:
             if (section->get_type() == ELFIO::SHT_SYMTAB) {
                 const symbol_section_accessor symbols(reader, section);
                 for (u32 j = 0; j < symbols.get_symbols_num(); ++j) {
-                    std::string name;
-                    Elf64_Addr address;
-                    Elf_Xword size;
+                    std::string   name;
+                    Elf64_Addr    address;
+                    Elf_Xword     size;
                     unsigned char bind;
                     unsigned char type;
-                    Elf_Half sectionIndex;
+                    Elf_Half      sectionIndex;
                     unsigned char other;
 
                     symbols.get_symbol(j, name, address, size, bind, type, sectionIndex, other);
