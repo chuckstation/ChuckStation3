@@ -1,15 +1,16 @@
-#include "Lv2RwLock.hpp"
 #include "PlayStation3.hpp"
 
+#include <Lv2Objects/Lv2RwLock.hpp>
 
 void Lv2RwLock::initLocks() {
-    read_id = ps3->lv2_obj.create<Lv2Mutex>()->handle();
+    read_id  = ps3->lv2_obj.create<Lv2Mutex>()->handle();
     write_id = ps3->lv2_obj.create<Lv2Mutex>()->handle();
 }
 
 void Lv2RwLock::rlock() {
     Lv2Mutex* read_mtx = ps3->lv2_obj.get<Lv2Mutex>(read_id);
-    if(!read_mtx->lock()) Helpers::panic("Lv2RwLock::rlock: mutex error\n");
+    if (!read_mtx->lock())
+        Helpers::panic("Lv2RwLock::rlock: mutex error\n");
 }
 
 void Lv2RwLock::runlock() {
@@ -19,7 +20,8 @@ void Lv2RwLock::runlock() {
 
 void Lv2RwLock::wlock() {
     Lv2Mutex* write_mtx = ps3->lv2_obj.get<Lv2Mutex>(write_id);
-    if (!write_mtx->lock()) Helpers::panic("Lv2RwLock::wlock: mutex error\n");
+    if (!write_mtx->lock())
+        Helpers::panic("Lv2RwLock::wlock: mutex error\n");
 }
 
 void Lv2RwLock::wunlock() {

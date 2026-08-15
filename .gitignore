@@ -52,7 +52,7 @@ compile_commands.json
 *.lib
 
 ## Emulator runtime state
-Filesystem/
+/Filesystem/
 
 ## Android
 android/.gradle/

@@ -44,8 +44,8 @@ endif()
 # ---------------------------------------------------------------------------
 # xxHash
 # ---------------------------------------------------------------------------
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/xxHash/cmake_unofficial/CMakeLists.txt")
-    add_subdirectory(third_party/xxHash/cmake_unofficial EXCLUDE_FROM_ALL)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/xxHash/build/cmake/CMakeLists.txt")
+    add_subdirectory(third_party/xxHash/build/cmake EXCLUDE_FROM_ALL)
 endif()
 
 # ---------------------------------------------------------------------------

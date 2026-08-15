@@ -1,11 +1,11 @@
-#include "Lv2LwCond.hpp"
 #include "PlayStation3.hpp"
 
+#include <Lv2Objects/Lv2LwCond.hpp>
 
 bool Lv2LwCond::signal() {
-    SysLwCond::LwCond* lwcond = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
+    SysLwCond::LwCond*   lwcond  = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
     SysLwMutex::LwMutex* lwmutex = (SysLwMutex::LwMutex*)ps3->mem.getPtr(lwcond->lwmutex_ptr);
-    Lv2Mutex* mtx = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
+    Lv2Mutex*            mtx     = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
 
     if (!wait_list.empty()) {
         // Wake up thread
@@ -16,7 +16,8 @@ bool Lv2LwCond::signal() {
         // Temporarily switch to the other thread to lock the mutex
         const auto curr_thread = ps3->thread_manager.getCurrentThread()->id;
         ps3->thread_manager.contextSwitch(*t);
-        if (!mtx->lock()) Helpers::panic("Lv2LwCond::signal: mutex error\n");
+        if (!mtx->lock())
+            Helpers::panic("Lv2LwCond::signal: mutex error\n");
         ps3->thread_manager.contextSwitch(*ps3->thread_manager.getThreadByID(curr_thread));
     }
 
@@ -24,9 +25,9 @@ bool Lv2LwCond::signal() {
 }
 
 bool Lv2LwCond::signalAll() {
-    SysLwCond::LwCond* lwcond = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
+    SysLwCond::LwCond*   lwcond  = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
     SysLwMutex::LwMutex* lwmutex = (SysLwMutex::LwMutex*)ps3->mem.getPtr(lwcond->lwmutex_ptr);
-    Lv2Mutex* mtx = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
+    Lv2Mutex*            mtx     = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
 
     while (!wait_list.empty()) {
         // Wake up thread
@@ -38,7 +39,8 @@ bool Lv2LwCond::signalAll() {
         // Temporarily switch to the other thread to lock the mutex
         const auto curr_thread = ps3->thread_manager.getCurrentThread()->id;
         ps3->thread_manager.contextSwitch(*t);
-        if (!mtx->lock()) Helpers::panic("Lv2LwCond::signalAll: mutex error\n");
+        if (!mtx->lock())
+            Helpers::panic("Lv2LwCond::signalAll: mutex error\n");
         ps3->thread_manager.contextSwitch(*ps3->thread_manager.getThreadByID(curr_thread));
     }
 
@@ -46,10 +48,10 @@ bool Lv2LwCond::signalAll() {
 }
 
 bool Lv2LwCond::wait() {
-    SysLwCond::LwCond* lwcond = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
-    SysLwMutex::LwMutex* lwmutex = (SysLwMutex::LwMutex*)ps3->mem.getPtr(lwcond->lwmutex_ptr);
-    Lv2Mutex* mtx = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
-    Thread* curr_thread = ps3->thread_manager.getCurrentThread();
+    SysLwCond::LwCond*   lwcond      = (SysLwCond::LwCond*)ps3->mem.getPtr(lwcond_ptr);
+    SysLwMutex::LwMutex* lwmutex     = (SysLwMutex::LwMutex*)ps3->mem.getPtr(lwcond->lwmutex_ptr);
+    Lv2Mutex*            mtx         = ps3->lv2_obj.get<Lv2Mutex>(lwmutex->sleep_queue);
+    Thread*              curr_thread = ps3->thread_manager.getCurrentThread();
 
     // Check if the current thread is the owner of the mutex
     if (mtx->owner != curr_thread->id)
@@ -61,6 +63,7 @@ bool Lv2LwCond::wait() {
     // Release the mutex while we are waiting
     mtx->unlock();
 
-    //printf("Thread %d \"%s\" is waiting on cond variable \"%s\"...\n", curr_thread->id, curr_thread->name.c_str(), name.c_str());
+    // printf("Thread %d \"%s\" is waiting on cond variable \"%s\"...\n", curr_thread->id, curr_thread->name.c_str(),
+    // name.c_str());
     return true;
 }
