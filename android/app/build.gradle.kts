@@ -31,7 +31,7 @@ android {
             cmake {
                 // Tell Gradle to use the repo root as the CMake source dir,
                 // so the top-level CMakeLists.txt is reused.
-                path = file("../../CMakeLists.txt")
+                setPath("../../CMakeLists.txt")
                 version = "3.22.1"
 
                 // Pass build flags through to CMake.
