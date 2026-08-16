@@ -80,7 +80,7 @@ jobs:
           fi
           echo "Tidying files:"
           echo "$FILES"
-          echo "$FILES" | xargs -r -n 1 clang-tidy-18 -p build --quiet --warnings-as-errors='' || true
+          echo "$FILES" | xargs -r clang-tidy-18 -p build --quiet --warnings-as-errors=''
 
   # -------------------------------------------------------------------------
   # Build matrix
