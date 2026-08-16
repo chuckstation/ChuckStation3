@@ -1,11 +1,9 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <CellTypes.hpp>
-
 
 // Circular dependency
 class PlayStation3;

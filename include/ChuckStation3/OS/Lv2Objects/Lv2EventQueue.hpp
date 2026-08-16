@@ -1,12 +1,9 @@
 #pragma once
 
-#include <common.hpp>
 #include <BEField.hpp>
-
-#include <queue>
-
 #include <Lv2Base.hpp>
-
+#include <common.hpp>
+#include <queue>
 
 class Lv2EventQueue : public virtual Lv2Base {
 public:
@@ -18,7 +15,7 @@ public:
         u64 data2;
         u64 data3;
     };
-    
+
     // Big endian CellOS equivalent struct (we could also just use this struct only for everything)
     struct sys_event {
         BEField<u64> source;
@@ -27,11 +24,11 @@ public:
         BEField<u64> data3;
     };
 
-    u32 size = 0;
-    std::queue<u64> wait_list;
+    u32               size = 0;
+    std::queue<u64>   wait_list;
     std::queue<Event> events;
-    bool is_connected_to_spu_event_port = false;    // For debugging
-    
+    bool              is_connected_to_spu_event_port = false; // For debugging
+
     void receive(u64 timeout);
     s32  tryreceive(u32 event_array_ptr, s32 size);
     void send(Event event);

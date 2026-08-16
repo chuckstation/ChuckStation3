@@ -3,11 +3,8 @@
 #include <common.hpp>
 #include <logger.hpp>
 #include <opengl.hpp>
-
 #include <unordered_map>
-
 #include <xxhash.h>
-
 
 class RSXCache {
 public:
@@ -29,11 +26,11 @@ public:
     struct CachedShader {
         OpenGL::Shader shader;
     };
-    
+
     bool getShader(u64 hash, CachedShader& shader) {
         if (shader_cache.contains(hash)) {
             shader = shader_cache[hash];
-            //log("Got cached shader: %016x\n", hash);
+            // log("Got cached shader: %016x\n", hash);
             return true;
         }
         return false;
@@ -42,7 +39,7 @@ public:
     bool getProgram(u64 hash, OpenGL::Program& program) {
         if (program_cache.contains(hash)) {
             program = program_cache[hash];
-            //log("Got cached program: %016x\n", hash);
+            // log("Got cached program: %016x\n", hash);
             return true;
         }
         return false;
@@ -58,12 +55,10 @@ public:
         log("Cached new program: %016x\n", hash);
     }
 
-    u64 computeHash(u8* ptr, size_t size) {
-        return XXH3_64bits(ptr, size);
-    }
+    u64 computeHash(u8* ptr, size_t size) { return XXH3_64bits(ptr, size); }
 
     u64 computeProgramHash(u64 hash_vertex, u64 hash_fragment) {
-        u64 hashes[2] = { hash_vertex, hash_fragment };
+        u64 hashes[2] = {hash_vertex, hash_fragment};
         return computeHash((u8*)&hashes[0], sizeof(u64) * 2);
     }
 
@@ -75,7 +70,7 @@ public:
     bool getTexture(u64 hash, OpenGL::Texture& texture) {
         if (texture_cache.contains(hash)) {
             texture = texture_cache[hash];
-            //log("Got cached texture: %016x\n", hash);
+            // log("Got cached texture: %016x\n", hash);
             return true;
         }
         return false;
@@ -89,7 +84,7 @@ public:
     bool getFramebuffer(u32 addr, OpenGL::Texture& framebuffer) {
         if (framebuffer_cache.contains(addr)) {
             framebuffer = framebuffer_cache[addr];
-            //log("Got cached framebuffer: %032x\n", addr);
+            // log("Got cached framebuffer: %032x\n", addr);
             return true;
         }
         return false;
@@ -104,7 +99,7 @@ private:
     MAKE_LOG_FUNCTION(log, rsx_cache);
 
     // TODO: Might change this to an std::vector of "CachedShader" structs or something
-    std::unordered_map<u64, CachedShader> shader_cache;
+    std::unordered_map<u64, CachedShader>    shader_cache;
     std::unordered_map<u64, OpenGL::Program> program_cache;
     std::unordered_map<u64, OpenGL::Texture> texture_cache;
     std::unordered_map<u32, OpenGL::Texture> framebuffer_cache;

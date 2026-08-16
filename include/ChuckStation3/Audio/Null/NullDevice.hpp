@@ -1,6 +1,5 @@
 #include "AudioDevice.hpp"
 
-
 class NullDevice : public AudioDevice {
 public:
     void init() override;

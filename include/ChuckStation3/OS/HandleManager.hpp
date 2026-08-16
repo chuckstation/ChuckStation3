@@ -1,6 +1,5 @@
 #pragma once
 
-
 class HandleManager {
 public:
     u32 next_handle = 0x100;

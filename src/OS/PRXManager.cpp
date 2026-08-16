@@ -1,28 +1,29 @@
 #include "PRXManager.hpp"
-#include "PlayStation3.hpp"
-#include <PRX/PRXLoader.hpp>
 
+#include "PlayStation3.hpp"
+
+#include <PRX/PRXLoader.hpp>
 
 PRXManager::PRXManager(PlayStation3* ps3) : ps3(ps3) {
     lle_modules = {
-        { "sys_fs",             "libfs.prx" },
-        { "cellResc",           "libresc.prx" },
-        { "cellPngDec",         "libpngdec.prx" },
-        { "cellJpgDec",         "libjpgdec.prx" },
-        { "cellFont",           "libfont.prx" },
-        { "cellFontFT",         "libfontFT.prx" },
-        { "cell_FreeType2",     "libfreetype.prx" },
-        { "sysPrxForUser",      "liblv2.prx" },
-        { "cellSpurs",          "libsre.prx" },
-        { "cellSync",           "libsre.prx" },
-        { "cellSheap",          "libsre.prx" },
-        { "cellOvis",           "libsre.prx" },
-        { "cellSync2",          "libsync2.prx" },
-        { "cellSpursJq",        "libspurs_jq.prx" },
-        { "cellKey2char",       "libkey2char.prx" },
-        { "cellL10n",           "libl10n.prx" },
-        { "cellFiber",          "libfiber.prx" },
-        { "cellSail",           "libsail.prx" },
+        {"sys_fs", "libfs.prx"},
+        {"cellResc", "libresc.prx"},
+        {"cellPngDec", "libpngdec.prx"},
+        {"cellJpgDec", "libjpgdec.prx"},
+        {"cellFont", "libfont.prx"},
+        {"cellFontFT", "libfontFT.prx"},
+        {"cell_FreeType2", "libfreetype.prx"},
+        {"sysPrxForUser", "liblv2.prx"},
+        {"cellSpurs", "libsre.prx"},
+        {"cellSync", "libsre.prx"},
+        {"cellSheap", "libsre.prx"},
+        {"cellOvis", "libsre.prx"},
+        {"cellSync2", "libsync2.prx"},
+        {"cellSpursJq", "libspurs_jq.prx"},
+        {"cellKey2char", "libkey2char.prx"},
+        {"cellL10n", "libl10n.prx"},
+        {"cellFiber", "libfiber.prx"},
+        {"cellSail", "libsail.prx"},
         //{ "cellGcmSys",         "libgcm_sys.prx" },
     };
 }
@@ -63,29 +64,30 @@ PRXLibraryInfo PRXManager::getLib(u32 id) {
         if (i.id == id)
             return i;
     }
-    return { .id = 0 };
+    return {.id = 0};
 }
 
 bool PRXManager::loadModule(const fs::path& path, u32* id) {
-    PRXLoader loader = PRXLoader(ps3);
+    PRXLoader      loader  = PRXLoader(ps3);
     PRXExportTable exports = ps3->module_manager.getExportTable();
-    
+
     if (!isLibLoaded(path.filename().generic_string())) {
         const fs::path lib_path = ps3->fs.guestPathToHost(path);
-        auto lib = loader.load(lib_path, exports);
+        auto           lib      = loader.load(lib_path, exports);
         libs.push_back(lib);
-        if (id) *id = lib.id;
+        if (id)
+            *id = lib.id;
         // Update export table
         ps3->module_manager.registerExportTable(exports);
         return true;
     }
-    
+
     return false;
 }
 
 bool PRXManager::loadModules() {
     PRXLoader loader = PRXLoader(ps3);
-    bool loaded = false;
+    bool      loaded = false;
 
     // Load modules
     log("Loading PRXs:\n", required_modules.size());

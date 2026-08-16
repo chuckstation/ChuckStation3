@@ -1,12 +1,10 @@
 #pragma once
 
-#include <common.hpp>
-#include <logger.hpp>
 #include <BEField.hpp>
-
 #include <CellTypes.hpp>
 #include <Lv2Objects/Lv2LwCond.hpp>
-
+#include <common.hpp>
+#include <logger.hpp>
 
 // Circular dependency
 class PlayStation3;

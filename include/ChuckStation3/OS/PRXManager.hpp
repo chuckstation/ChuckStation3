@@ -1,12 +1,9 @@
 #pragma once
 
+#include <PRX/PRXLibraryInfo.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-
 #include <unordered_map>
-
-#include <PRX/PRXLibraryInfo.hpp>
-
 
 // Circular dependency
 class PlayStation3;
@@ -25,17 +22,17 @@ public:
 
     fs::path lib_dir = "/dev_flash/sys/external/";
 
-    std::vector<std::string> required_modules;  // List of required modules, load them with loadModules()
-    std::vector<PRXLibraryInfo> libs;   // List of loaded libraries
+    std::vector<std::string>    required_modules; // List of required modules, load them with loadModules()
+    std::vector<PRXLibraryInfo> libs;             // List of loaded libraries
 
-    bool isLLEModule(const std::string name);
-    bool isLibLoaded(const std::string name);
+    bool           isLLEModule(const std::string name);
+    bool           isLibLoaded(const std::string name);
     PRXLibraryInfo getLib(u32 id);
-    void require(const std::string name);
-    bool loadModule(const fs::path& path, u32* id = nullptr);  // Return true if the module was loaded
-    bool loadModules(); // Returns true if at least 1 module was loaded
-    void loadModulesRecursively();
-    void initializeLibraries();
+    void           require(const std::string name);
+    bool           loadModule(const fs::path& path, u32* id = nullptr); // Return true if the module was loaded
+    bool           loadModules();                                       // Returns true if at least 1 module was loaded
+    void           loadModulesRecursively();
+    void           initializeLibraries();
 
 private:
     MAKE_LOG_FUNCTION(log, manager_prx);

@@ -10,7 +10,6 @@
 
 #include <PlayStation3.hpp>
 #include <Settings.hpp>
-
 #include <cstdio>
 #include <cstdlib>
 
@@ -18,17 +17,17 @@ namespace {
 
 int failures = 0;
 
-#define CHECK(cond)                                                            \
-    do {                                                                       \
-        if (!(cond)) {                                                         \
+#define CHECK(cond)                                                               \
+    do {                                                                          \
+        if (!(cond)) {                                                            \
             std::fprintf(stderr, "FAIL: %s:%d: %s\n", __FILE__, __LINE__, #cond); \
-            ++failures;                                                        \
-        } else {                                                               \
-            std::fprintf(stdout, "ok:   %s\n", #cond);                          \
-        }                                                                      \
+            ++failures;                                                           \
+        } else {                                                                  \
+            std::fprintf(stdout, "ok:   %s\n", #cond);                            \
+        }                                                                         \
     } while (0)
 
-}  // namespace
+} // namespace
 
 int main() {
     std::printf("ChuckStation 3 smoke test\n");
@@ -49,7 +48,7 @@ int main() {
         ps3.resetButtons();
         ps3.setLeftStick(0.5f, 0.5f);
         ps3.setRightStick(0.5f, 0.5f);
-        ps3.pressButton(0);   // CELL_PAD_CTRL_L1 = 0x1 << 0
+        ps3.pressButton(0); // CELL_PAD_CTRL_L1 = 0x1 << 0
     } catch (const std::exception& e) {
         std::fprintf(stderr, "FAIL: PlayStation3 constructor threw: %s\n", e.what());
         ++failures;

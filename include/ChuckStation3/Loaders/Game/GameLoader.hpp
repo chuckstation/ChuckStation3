@@ -1,12 +1,9 @@
 #pragma once
 
+#include <SFO/SFOLoader.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-
-#include <SFO/SFOLoader.hpp>
-
 #include <unordered_map>
-
 
 // Circular dependency
 class PlayStation3;
@@ -17,15 +14,15 @@ public:
     PlayStation3* ps3;
 
     struct InstalledGame {
-        std::string title;
-        std::string id;
-        fs::path content_path;
+        std::string        title;
+        std::string        id;
+        fs::path           content_path;
         SFOLoader::SFOData sfo;
     };
     std::vector<InstalledGame> games;
 
-    void refresh();
-    bool isDiscGameOK();
+    void          refresh();
+    bool          isDiscGameOK();
     InstalledGame getDiscGame();
 
 private:

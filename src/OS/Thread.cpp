@@ -1,23 +1,34 @@
 #include "Thread.hpp"
-#include "ThreadManager.hpp"
+
 #include "PlayStation3.hpp"
+#include "ThreadManager.hpp"
 
-
-Thread::Thread(u64 entry, u64 stack_size, u64 arg, s32 prio, const u8* name, u32 id, u32 tls_vaddr, u32 tls_filesize, u32 tls_memsize, ThreadManager* mgr) : mgr(mgr) {
+Thread::Thread(u64            entry,
+               u64            stack_size,
+               u64            arg,
+               s32            prio,
+               const u8*      name,
+               u32            id,
+               u32            tls_vaddr,
+               u32            tls_filesize,
+               u32            tls_memsize,
+               ThreadManager* mgr)
+    : mgr(mgr) {
     const u32 real_entry = mgr->ps3->mem.read<u32>(entry);
-    this->id = id;
-    this->name = Helpers::readString(name);
-    this->prio = prio;
+    this->id             = id;
+    this->name           = Helpers::readString(name);
+    this->prio           = prio;
 
     // TODO: stack size should also be aligned to 0x1000 byte boundary
-    if (stack_size < 0x1000) stack_size = 0x1000;
+    if (stack_size < 0x1000)
+        stack_size = 0x1000;
 
-    stack = mgr->allocateStack(stack_size);
+    stack            = mgr->allocateStack(stack_size);
     this->stack_size = stack_size;
 
     const u64 sp = stack + stack_size;
-    state.pc = real_entry;
-    
+    state.pc     = real_entry;
+
     state.gprs[1] = sp - 8;
     state.gprs[2] = mgr->ps3->mem.read<u32>(entry + 4);
 
@@ -27,7 +38,7 @@ Thread::Thread(u64 entry, u64 stack_size, u64 arg, s32 prio, const u8* name, u32
     }
 
     state.gprs[3] = arg;
-    
+
     func_done_flag_queue.reserve(128);
 }
 
@@ -74,12 +85,13 @@ void Thread::finalizeArgsAndEnv() {
         state.gprs[1] -= 8;
 
     // Should be unreachable.
-    // The args/env variables we push are all u64s, if we are still not aligned to 16 byte boundary after subtracting 8 it means something went wrong.
+    // The args/env variables we push are all u64s, if we are still not aligned to 16 byte boundary after subtracting 8
+    // it means something went wrong.
     if (state.gprs[1] & 0xf)
         Helpers::panic("Bad stack alignment after arg and env setup: 0x%08x\n", state.gprs[1]);
 
     state.gprs[1] -= 0x70;
-    //printf("sp for thread \"%s\": 0x%08x\n", name.c_str(), (u32)state.gprs[1]);
+    // printf("sp for thread \"%s\": 0x%08x\n", name.c_str(), (u32)state.gprs[1]);
 }
 
 // We put the reschedule on the scheduler instead of having it happen instantly because it would break
@@ -105,7 +117,7 @@ void Thread::sleepForCycles(u64 cycles) {
 }
 
 void Thread::wait(std::string wait_reason) {
-    status = ThreadStatus::Waiting;
+    status            = ThreadStatus::Waiting;
     this->wait_reason = wait_reason;
     reschedule();
     log("Thread %d \"%s\" is waiting\n", id, name.c_str());
@@ -124,14 +136,14 @@ void Thread::timeoutEvent() {
 }
 
 void Thread::wakeUp() {
-    status = ThreadStatus::Running;
+    status      = ThreadStatus::Running;
     wait_reason = "";
     reschedule();
     log("Woke up thread %d \"%s\"\n", id, name.c_str());
 }
 
 void Thread::join(u32 id, u32 vptr) {
-    waiter = id;
+    waiter     = id;
     this->vptr = vptr;
     mgr->getThreadByID(waiter)->wait(std::format("joining thread {:s}", name));
 }

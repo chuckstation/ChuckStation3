@@ -1,12 +1,9 @@
 #pragma once
 
-#include <common.hpp>
-
-#include <queue>
-
 #include <Lv2Base.hpp>
 #include <Lv2Objects/Lv2Mutex.hpp>
-
+#include <common.hpp>
+#include <queue>
 
 class Lv2RwLock : public virtual Lv2Base {
 public:

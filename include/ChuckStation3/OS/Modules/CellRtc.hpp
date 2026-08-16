@@ -1,13 +1,10 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
+#include <chrono>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <chrono>
-
-#include <CellTypes.hpp>
-
 
 // Circular dependency
 class PlayStation3;
@@ -20,12 +17,12 @@ public:
     PlayStation3* ps3;
 
     struct CellRtcDateTime {
-        BEField<u16> year;       
-        BEField<u16> month;      
-        BEField<u16> day;        
-        BEField<u16> hour;       
-        BEField<u16> minute;     
-        BEField<u16> second;     
+        BEField<u16> year;
+        BEField<u16> month;
+        BEField<u16> day;
+        BEField<u16> hour;
+        BEField<u16> minute;
+        BEField<u16> second;
         BEField<u32> microsecond;
     };
 

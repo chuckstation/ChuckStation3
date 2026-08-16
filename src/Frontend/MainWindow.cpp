@@ -1,23 +1,22 @@
 #include "MainWindow.hpp"
 
-
 MainWindow::MainWindow() : QMainWindow() {
-    ps3 = new PlayStation3();
-    game_loader = new GameLoader(ps3);
-    game_window = new GameWindow(this);
-    settings = new SettingsWidget(ps3);
+    ps3             = new PlayStation3();
+    game_loader     = new GameLoader(ps3);
+    game_window     = new GameWindow(this);
+    settings        = new SettingsWidget(ps3);
     thread_debugger = new ThreadDebuggerWidget(ps3);
-    ppu_debugger = new PPUDebuggerWidget(ps3, game_window);
-    about_window = new AboutWindow(this);
-    
+    ppu_debugger    = new PPUDebuggerWidget(ps3, game_window);
+    about_window    = new AboutWindow(this);
+
     // Qt6 UI
     ui.setupUi(this);
-    
+
     // Setup menubar buttons
     connect(ui.actionLaunch_Disc_Game, &QAction::triggered, this, &MainWindow::launchDiscGame);
     connect(ui.actionOpen_ELF, &QAction::triggered, this, &MainWindow::launchELF);
     connect(ui.actionInstall_Package, &QAction::triggered, this, &MainWindow::installPackage);
-    
+
     connect(ui.actionSystem, &QAction::triggered, this, [this]() {
         settings->ui.tabWidget->setCurrentIndex(0);
         settings->show();
@@ -31,7 +30,7 @@ MainWindow::MainWindow() : QMainWindow() {
     connect(ui.actionLLE, &QAction::triggered, this, [this]() {
         settings->ui.tabWidget->setCurrentIndex(2);
         settings->show();
-        });
+    });
 
     connect(ui.actionPPU, &QAction::triggered, this, [this]() {
         settings->ui.tabWidget->setCurrentIndex(3);
@@ -52,31 +51,23 @@ MainWindow::MainWindow() : QMainWindow() {
         settings->ui.tabWidget->setCurrentIndex(6);
         settings->show();
     });
-    
+
     connect(ui.actionDebug, &QAction::triggered, this, [this]() {
         settings->ui.tabWidget->setCurrentIndex(7);
         settings->show();
     });
 
-    connect(ui.actionThread_Debugger, &QAction::triggered, this, [this]() {
-        thread_debugger->show();
-    });
+    connect(ui.actionThread_Debugger, &QAction::triggered, this, [this]() { thread_debugger->show(); });
 
-    connect(ui.actionPPU_Debugger, &QAction::triggered, this, [this]() {
-        ppu_debugger->show();
-    });
-    
+    connect(ui.actionPPU_Debugger, &QAction::triggered, this, [this]() { ppu_debugger->show(); });
+
     connect(ui.actionReplay_RSX_Capture, &QAction::triggered, this, &MainWindow::replayRSXCapture);
-    
-    connect(ui.actionAbout_ChuckStation3, &QAction::triggered, this, [this]() {
-        about_window->show();
-    });
-    
+
+    connect(ui.actionAbout_ChuckStation3, &QAction::triggered, this, [this]() { about_window->show(); });
+
     // Pause / Resume
-    connect(ui.pauseButton, &QPushButton::clicked, this, [this]() {
-        pause();
-    });
-    
+    connect(ui.pauseButton, &QPushButton::clicked, this, [this]() { pause(); });
+
     // Timer to periodically check if some event other than user input caused the emulator to pause (i.e. a breakpoint)
     connect(&timer, &QTimer::timeout, this, [this]() {
         if (game_window->in_pause && !is_paused) {
@@ -88,8 +79,8 @@ MainWindow::MainWindow() : QMainWindow() {
     });
     timer.setInterval(100);
     timer.start();
-    
-    int row = 0;
+
+    int row    = 0;
     int column = 0;
 
     // Setup the table widget
@@ -97,7 +88,7 @@ MainWindow::MainWindow() : QMainWindow() {
         curr_selection = row;
         updateBackgroundImage();
     });
-    
+
     connect(ui.tableWidget, &QTableWidget::cellDoubleClicked, this, [this](int row, int column) {
         curr_selection = row;
         loadAndLaunchGame(row);
@@ -117,10 +108,10 @@ MainWindow::MainWindow() : QMainWindow() {
     }
 
     resize(1280, 720);
-    
+
     // Center window
     move(screen()->geometry().center() - frameGeometry().center());
-    
+
     setWindowTitle("ChuckStation3");
     show();
 }
@@ -128,7 +119,7 @@ MainWindow::MainWindow() : QMainWindow() {
 void MainWindow::refreshGameList() {
     game_loader->refresh();
     ui.tableWidget->clear();
-    
+
     ui.tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui.tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui.tableWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -143,8 +134,8 @@ void MainWindow::refreshGameList() {
     ui.tableWidget->setColumnWidth(2, 100);
     ui.tableWidget->setColumnWidth(3, 100);
     ui.tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    ui.tableWidget->setHorizontalHeaderLabels(QStringList({ tr("Icon"), tr("Title"), "ID", tr("Version")}));
-    
+    ui.tableWidget->setHorizontalHeaderLabels(QStringList({tr("Icon"), tr("Title"), "ID", tr("Version")}));
+
     // Populate table
     for (int i = 0; i < game_loader->games.size(); i++) {
         setListIcon(i, ps3->fs.guestPathToHost(game_loader->games[i].content_path / "ICON0.PNG"));
@@ -158,10 +149,10 @@ void MainWindow::refreshGameList() {
 }
 
 void MainWindow::setListItem(int row, int column, std::string str) {
-    QTableWidgetItem* item = new QTableWidgetItem();
-    QWidget* widget = new QWidget(this);
-    QVBoxLayout* layout = new QVBoxLayout(widget);
-    QLabel* label = new QLabel(widget);
+    QTableWidgetItem* item   = new QTableWidgetItem();
+    QWidget*          widget = new QWidget(this);
+    QVBoxLayout*      layout = new QVBoxLayout(widget);
+    QLabel*           label  = new QLabel(widget);
 
     layout->setAlignment(Qt::AlignVCenter);
     label->setStyleSheet("color: white; font-size: 16px;");
@@ -175,18 +166,18 @@ void MainWindow::setListItem(int row, int column, std::string str) {
 }
 
 void MainWindow::setListIcon(int row, fs::path icon) {
-    QTableWidgetItem* item = new QTableWidgetItem();
-    QWidget* widget = new QWidget(this);
-    QVBoxLayout* layout = new QVBoxLayout(widget);
-    QLabel* label = new QLabel(widget);
-    
+    QTableWidgetItem* item   = new QTableWidgetItem();
+    QWidget*          widget = new QWidget(this);
+    QVBoxLayout*      layout = new QVBoxLayout(widget);
+    QLabel*           label  = new QLabel(widget);
+
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setAlignment(Qt::AlignCenter);
     if (fs::exists(icon)) {
-        QImage image = QImage(QString::fromStdString(icon.generic_string())).scaled(100, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QImage image = QImage(QString::fromStdString(icon.generic_string()))
+                           .scaled(100, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         label->setPixmap(QPixmap::fromImage(image));
-    }
-    else {
+    } else {
         label->setText("No icon");
     }
 
@@ -217,9 +208,11 @@ bool MainWindow::ensureGameNotRunning() {
 }
 
 void MainWindow::launchDiscGame() {
-    if (ensureGameNotRunning()) return;
+    if (ensureGameNotRunning())
+        return;
 
-    const fs::path path = QFileDialog::getExistingDirectory(this, tr("Select a PlayStation3 Disc Game"), ".").toStdString();
+    const fs::path path =
+        QFileDialog::getExistingDirectory(this, tr("Select a PlayStation3 Disc Game"), ".").toStdString();
     if (!path.empty()) {
         ps3->fs.mount(Filesystem::Device::DEV_BDVD, path);
         if (!game_loader->isDiscGameOK()) {
@@ -237,9 +230,11 @@ void MainWindow::launchDiscGame() {
 }
 
 void MainWindow::launchELF() {
-    if (ensureGameNotRunning()) return;
+    if (ensureGameNotRunning())
+        return;
 
-    const fs::path path = QFileDialog::getOpenFileName(this, "Select a PlayStation3 ELF", "", "ELF File (*.elf)").toStdString();
+    const fs::path path =
+        QFileDialog::getOpenFileName(this, "Select a PlayStation3 ELF", "", "ELF File (*.elf)").toStdString();
     if (!path.empty()) {
         ps3->elf_path = path;
         launchGame();
@@ -247,11 +242,12 @@ void MainWindow::launchELF() {
 }
 
 void MainWindow::installPackage() {
-    const fs::path path = QFileDialog::getOpenFileName(this, "Select a PlayStation3 Package", "", "Package File (*.pkg)").toStdString();
+    const fs::path path =
+        QFileDialog::getOpenFileName(this, "Select a PlayStation3 Package", "", "Package File (*.pkg)").toStdString();
     if (!path.empty()) {
         // Temporarily block window from resizing
         setFixedSize(size());
-        
+
         pkg_ui = new PKGInstallerOverlay(ps3, this);
         pkg_ui->resize(size());
         pkg_ui->raise();
@@ -265,9 +261,11 @@ void MainWindow::installPackage() {
 }
 
 void MainWindow::replayRSXCapture() {
-    if (ensureGameNotRunning()) return;
+    if (ensureGameNotRunning())
+        return;
 
-    const fs::path path = QFileDialog::getExistingDirectory(this, "Select a ChuckStation3 RSX Capture folder", ".").toStdString();
+    const fs::path path =
+        QFileDialog::getExistingDirectory(this, "Select a ChuckStation3 RSX Capture folder", ".").toStdString();
     if (!path.empty()) {
         ps3->rsx_capture_path = path;
         launchGame();
@@ -275,7 +273,8 @@ void MainWindow::replayRSXCapture() {
 }
 
 void MainWindow::loadAndLaunchGame(int idx) {
-    if (ensureGameNotRunning()) return;
+    if (ensureGameNotRunning())
+        return;
     Helpers::debugAssert(idx >= 0 && idx < game_loader->games.size(), "MainWindow::loadAndLaunchGame: invalid idx");
 
     ps3->loadGame(game_loader->games[idx]);
@@ -283,15 +282,18 @@ void MainWindow::loadAndLaunchGame(int idx) {
 }
 
 void MainWindow::updateBackgroundImage() {
-    if (!game_loader) return;
-    if (curr_selection < 0 || curr_selection >= game_loader->games.size()) return;
+    if (!game_loader)
+        return;
+    if (curr_selection < 0 || curr_selection >= game_loader->games.size())
+        return;
 
     fs::path local_content_path = ps3->fs.guestPathToHost(game_loader->games[curr_selection].content_path);
     QPalette palette;
     if (fs::exists(local_content_path / "PIC1.PNG")) {
         fs::path image_path = local_content_path / "PIC1.PNG";
-        QImage image = QImage(QString::fromStdString(image_path.generic_string()));
-        QPixmap pix = QPixmap::fromImage(image).scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        QImage   image      = QImage(QString::fromStdString(image_path.generic_string()));
+        QPixmap  pix =
+            QPixmap::fromImage(image).scaled(size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         QPixmap final_pix = QPixmap(size());
         final_pix.fill(Qt::transparent);
         QPainter painter = QPainter(&final_pix);
@@ -307,10 +309,12 @@ void MainWindow::updateBackgroundImage() {
 void MainWindow::launchGame() {
     if (int err = ps3->init()) {
         switch (err) {
-        case -1: {
-            QMessageBox::critical(this, tr("License not found"), tr("You do not have the required license (.rap) file to play this game"));
-            break;
-        }
+            case -1: {
+                QMessageBox::critical(this,
+                                      tr("License not found"),
+                                      tr("You do not have the required license (.rap) file to play this game"));
+                break;
+            }
         }
         return;
     }
@@ -332,14 +336,15 @@ void MainWindow::gameThread() {
 void MainWindow::pause() {
     if (is_game_running) {
         timer.stop();
-        
+
         if (!is_paused) {
-            // The game thread will check the atomic variable below on every RSX flip to know if we requested to pause the emulator.
-            // We can't assume the game thread will pause instantly, we also can't assume it will ever pause if no RSX flip happens at all
+            // The game thread will check the atomic variable below on every RSX flip to know if we requested to pause
+            // the emulator. We can't assume the game thread will pause instantly, we also can't assume it will ever
+            // pause if no RSX flip happens at all
             game_window->paused = true;
             // Wait until the game flips & pauses, or timeout if no flip happens (meaning we failed to pause)
             // We wait 100ms for 100 times (== 10s timeout)
-            int cnt = 0;
+            int  cnt     = 0;
             bool timeout = false;
             while (!game_window->in_pause) {
                 if (cnt == 100) {
@@ -349,12 +354,12 @@ void MainWindow::pause() {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 cnt++;
             }
-            
+
             if (!timeout) {
                 is_paused = true;
                 ui.pauseButton->setText(tr("Resume"));
                 enableWidgets();
-            } else {    // Did we timeout?
+            } else { // Did we timeout?
                 game_window->paused = false;
                 game_window->pause_sema.release();
                 timer.start();
@@ -386,7 +391,8 @@ void MainWindow::pollGameWindowInput() {
     game_window->pollInput();
 }
 
-void MainWindow::onExit() {}
+void MainWindow::onExit() {
+}
 
 void MainWindow::resizeEvent(QResizeEvent* event) {
     QMainWindow::resizeEvent(event);

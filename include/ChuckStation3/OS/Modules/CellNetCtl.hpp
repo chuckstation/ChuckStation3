@@ -1,11 +1,9 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <CellTypes.hpp>
-
 
 // Circular dependency
 class PlayStation3;
@@ -19,9 +17,9 @@ public:
 
     enum CellNetCtlState : s32 {
         CELL_NET_CTL_STATE_Disconnected = 0,
-        CELL_NET_CTL_STATE_Connecting = 1,
-        CELL_NET_CTL_STATE_IPObtaining = 2,
-        CELL_NET_CTL_STATE_IPObtained = 3,
+        CELL_NET_CTL_STATE_Connecting   = 1,
+        CELL_NET_CTL_STATE_IPObtaining  = 2,
+        CELL_NET_CTL_STATE_IPObtained   = 3,
     };
 
     u64 cellNetCtlGetState();

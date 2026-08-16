@@ -1,11 +1,9 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <CellTypes.hpp>
-
 
 // Circular dependency
 class PlayStation3;
@@ -18,8 +16,8 @@ public:
     PlayStation3* ps3;
 
     const fs::path cert_dir = "/dev_flash/data/cert/";
-    fs::path getCertificatePathByID(u32 id);
-    std::string getCertificateByID(u32 id);
+    fs::path       getCertificatePathByID(u32 id);
+    std::string    getCertificateByID(u32 id);
 
     u64 cellSslCertificateLoader();
 

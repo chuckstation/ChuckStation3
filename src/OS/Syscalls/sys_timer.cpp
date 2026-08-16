@@ -1,6 +1,6 @@
-#include <Syscall.hpp>
 #include "PlayStation3.hpp"
 
+#include <Syscall.hpp>
 
 MAKE_LOG_FUNCTION(log_sys_timer, sys_timer);
 
@@ -18,7 +18,7 @@ u64 Syscall::sys_timer_sleep() {
     log_sys_timer("sys_timer_sleep(s: %d)\n", s);
 
     ps3->thread_manager.getCurrentThread()->sleep(s * 1000000);
-    //ps3->thread_manager.getCurrentThread()->sleep(s * 1);
+    // ps3->thread_manager.getCurrentThread()->sleep(s * 1);
 
     return CELL_OK;
 }

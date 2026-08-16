@@ -1,11 +1,9 @@
 #pragma once
 
+#include <BEField.hpp>
+#include <CellTypes.hpp>
 #include <common.hpp>
 #include <logger.hpp>
-#include <BEField.hpp>
-
-#include <CellTypes.hpp>
-
 
 // Circular dependency
 class PlayStation3;
@@ -21,8 +19,8 @@ public:
     PlayStation3* ps3;
 
     struct CellSysCacheParam {
-        u8 cache_id[CELL_SYSCACHE_ID_SIZE];
-        u8 cache_path[CELL_SYSCACHE_PATH_MAX];
+        u8           cache_id[CELL_SYSCACHE_ID_SIZE];
+        u8           cache_path[CELL_SYSCACHE_PATH_MAX];
         BEField<u32> reserved;
     };
 

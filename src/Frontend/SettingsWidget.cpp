@@ -1,11 +1,10 @@
 #include "SettingsWidget.hpp"
 
-
 SettingsWidget::SettingsWidget(PlayStation3* ps3, QWidget* parent) : QWidget(parent, Qt::Window), ps3(ps3) {
     ui.setupUi(this);
 
     // Initialize settings
-    
+
     // System
     ui.nickname->setText(QString::fromStdString(ps3->settings.system.nickname));
 
@@ -23,7 +22,7 @@ SettingsWidget::SettingsWidget(PlayStation3* ps3, QWidget* parent) : QWidget(par
     ui.cellJpgDec->setChecked(ps3->settings.lle.cellJpgDec);
     ui.cellSpurs->setChecked(ps3->settings.lle.cellSpurs);
     ui.cellSpursJq->setChecked(ps3->settings.lle.cellSpursJq);
-    
+
     // Audio
     ui.audioBackend->setCurrentIndex(ui.audioBackend->findData(ps3->settings.audio.backend.c_str(), Qt::DisplayRole));
 
@@ -36,7 +35,7 @@ SettingsWidget::SettingsWidget(PlayStation3* ps3, QWidget* parent) : QWidget(par
 
     // Setup events
     connect(ui.apply, &QPushButton::clicked, this, [this, ps3]() {
-        ps3->settings.system.nickname   = ui.nickname->text().toStdString();
+        ps3->settings.system.nickname = ui.nickname->text().toStdString();
 
         ps3->settings.filesystem.dev_hdd0_mountpoint   = ui.dev_hdd0_mountpoint->text().toStdString();
         ps3->settings.filesystem.dev_hdd1_mountpoint   = ui.dev_hdd1_mountpoint->text().toStdString();
@@ -50,17 +49,17 @@ SettingsWidget::SettingsWidget(PlayStation3* ps3, QWidget* parent) : QWidget(par
         ps3->settings.lle.cellJpgDec    = ui.cellJpgDec->isChecked();
         ps3->settings.lle.cellSpurs     = ui.cellSpurs->isChecked();
         ps3->settings.lle.cellSpursJq   = ui.cellSpursJq->isChecked();
-        
+
         ps3->settings.audio.backend = ui.audioBackend->currentText().toStdString();
 
-        ps3->settings.debug.pause_on_start                      = ui.pauseOnStart->isChecked();
-        ps3->settings.debug.disable_spu                         = ui.disableSPU->isChecked();
-        ps3->settings.debug.enable_spu_after_pc                 = ui.enableSPUAfterPC->text().toStdString();
-        ps3->settings.debug.spu_thread_to_enable                = ui.spuThreadToEnable->text().toStdString();
-        ps3->settings.debug.dont_step_cellaudio_port_read_idx   = ui.dontStepCellAudioPortReadIndex->isChecked();
+        ps3->settings.debug.pause_on_start                    = ui.pauseOnStart->isChecked();
+        ps3->settings.debug.disable_spu                       = ui.disableSPU->isChecked();
+        ps3->settings.debug.enable_spu_after_pc               = ui.enableSPUAfterPC->text().toStdString();
+        ps3->settings.debug.spu_thread_to_enable              = ui.spuThreadToEnable->text().toStdString();
+        ps3->settings.debug.dont_step_cellaudio_port_read_idx = ui.dontStepCellAudioPortReadIndex->isChecked();
 
         ps3->settings.save();
-        
+
         // Update the backends
         ps3->createAudioDevice();
     });
