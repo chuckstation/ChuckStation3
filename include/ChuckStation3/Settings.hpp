@@ -1,6 +1,8 @@
 #pragma once
 
+#if !defined(ANDROID) && !defined(CHUCKSTATION3_ANDROID)
 #include <SDL.h>
+#endif
 #include <common.hpp>
 #include <toml.hpp>
 

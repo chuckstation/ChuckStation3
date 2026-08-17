@@ -1,4 +1,6 @@
 #pragma once
+#include "common.hpp"
+
 #include <capstone/capstone.h>
 #include <cstdint>
 #include <span>

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.hpp"
+
 #include <BitField.hpp>
 
 struct FragmentInstruction {

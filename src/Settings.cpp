@@ -1,7 +1,11 @@
 #include "Settings.hpp"
 
 void Settings::load() {
+#if defined(ANDROID) || defined(CHUCKSTATION3_ANDROID)
+    fs::path path = "/sdcard/ChuckStation3";
+#else
     fs::path path = SDL_GetPrefPath("ChuckStation", "ChuckStation3");
+#endif
     path /= "config.toml";
     printf("Loading configuration file at %s\n", path.generic_string().c_str());
 
@@ -84,7 +88,11 @@ void Settings::load() {
 }
 
 void Settings::save() {
+#if defined(ANDROID) || defined(CHUCKSTATION3_ANDROID)
+    fs::path path = "/sdcard/ChuckStation3";
+#else
     fs::path path = SDL_GetPrefPath("ChuckStation", "ChuckStation3");
+#endif
     path /= "config.toml";
     printf("Saving configuration file at %s\n", path.generic_string().c_str());
 

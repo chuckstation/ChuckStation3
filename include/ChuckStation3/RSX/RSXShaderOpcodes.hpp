@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.hpp"
+
 namespace RSXVertex {
 namespace SCALAR {
 enum : u8 {

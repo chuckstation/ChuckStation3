@@ -29,18 +29,14 @@ android {
         // Drive the NDK CMake build. The path is relative to this module.
         externalNativeBuild {
             cmake {
-                // Tell Gradle to use the repo root as the CMake source dir,
-                // so the top-level CMakeLists.txt is reused.
-                path(file("../../CMakeLists.txt"))
-                version = "3.22.1"
-
                 // Pass build flags through to CMake.
                 arguments += listOf(
                     "-DANDROID_STL=c++_shared",
                     "-DANDROID_PLATFORM=android-24",
                     "-DCHUCKSTATION3_ANDROID=ON",
                     "-DENABLE_USER_BUILD=ON",
-                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+                    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+                    "-DCMAKE_CXX_FLAGS=-D_LIBCPP_ENABLE_EXPERIMENTAL"
                 )
 
                 // C++ flags — the core needs a recent C++ standard; the NDK
@@ -57,6 +53,15 @@ android {
                     "-fvisibility=hidden"
                 )
             }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            // Tell Gradle to use the repo root as the CMake source dir,
+            // so the top-level CMakeLists.txt is reused.
+            path(file("../../CMakeLists.txt"))
+            version = "3.22.1"
         }
     }
 

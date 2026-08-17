@@ -191,11 +191,8 @@ if(NOT ANDROID)
 endif()
 
 # miniaudio is a single .c file that needs to be compiled into the core.
-if(NOT ANDROID)
-    # Desktop path: compile miniaudio.c with the core.
-    target_sources(chuckstation3_core PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}/third_party/miniaudio/miniaudio.c")
-endif()
+target_sources(chuckstation3_core PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/third_party/miniaudio/miniaudio.c")
 
 # lodepng is two files; compile them directly into the core.
 target_sources(chuckstation3_core PRIVATE
