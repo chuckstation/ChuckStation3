@@ -1,5 +1,6 @@
 #pragma once
 
+#include <PPUDisassembler.hpp>
 #include <PPUTypes.hpp>
 #include <common.hpp>
 #include <queue>

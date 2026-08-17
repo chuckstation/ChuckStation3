@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common.hpp"
+
 static constexpr u64 PAGE_BITS              = 16;
 static constexpr u64 PAGE_SHIFT             = (32 - PAGE_BITS);
 static constexpr u64 PAGE_COUNT             = 1ull << PAGE_BITS;

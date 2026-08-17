@@ -17,6 +17,13 @@
 #define __has_builtin(x) 0
 #endif
 
+#ifdef PAGE_SIZE
+#undef PAGE_SIZE
+#endif
+#ifdef PAGE_MASK
+#undef PAGE_MASK
+#endif
+
 // Types
 using u8  = std::uint8_t;
 using u16 = std::uint16_t;
@@ -58,7 +65,11 @@ template <class... Args>
 [[noreturn]] static void panic(const char* fmt, Args&&... args) {
     std::string error;
     error.resize(512_KB);
-    std::sprintf(error.data(), fmt, args...);
+    if constexpr (sizeof...(Args) == 0) {
+        std::snprintf(error.data(), error.size(), "%s", fmt);
+    } else {
+        std::snprintf(error.data(), error.size(), fmt, args...);
+    }
     throw std::runtime_error(error);
 }
 
@@ -67,7 +78,11 @@ static void debugAssert(bool cond, const char* fmt, Args&&... args) {
     if (!cond) [[unlikely]] {
         std::string error;
         error.resize(512_KB);
-        std::sprintf(error.data(), fmt, args...);
+        if constexpr (sizeof...(Args) == 0) {
+            std::snprintf(error.data(), error.size(), "%s", fmt);
+        } else {
+            std::snprintf(error.data(), error.size(), fmt, args...);
+        }
         throw std::runtime_error(error);
     }
 }
