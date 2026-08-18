@@ -57,6 +57,14 @@ include(ChuckStation3ThirdParty)
 include(ChuckStation3Architecture)
 
 # ---------------------------------------------------------------------------
+# Qt6 dependency (if enabled)
+# ---------------------------------------------------------------------------
+if(ENABLE_QT_BUILD)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets)
+    qt_standard_project_setup()
+endif()
+
+# ---------------------------------------------------------------------------
 # Emulator core (shared across every frontend)
 # ---------------------------------------------------------------------------
 add_library(chuckstation3_core STATIC)
@@ -225,6 +233,27 @@ if(ENABLE_USER_BUILD)
 endif()
 if(ENABLE_QT_BUILD)
     target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_QT_BUILD)
+    target_link_libraries(chuckstation3_core PUBLIC Qt6::Widgets)
+    set_target_properties(chuckstation3_core PROPERTIES
+        AUTOMOC ON
+        AUTORCC ON
+        AUTOUIC ON
+    )
+    qt_add_ui(chuckstation3_core SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/mainwindow.ui"
+        INCLUDE_PREFIX "Frontend/UI")
+    qt_add_ui(chuckstation3_core SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/settings.ui"
+        INCLUDE_PREFIX "Frontend/UI")
+    qt_add_ui(chuckstation3_core SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/thread_debugger.ui"
+        INCLUDE_PREFIX "Frontend/UI")
+    qt_add_ui(chuckstation3_core SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/ppu_debugger.ui"
+        INCLUDE_PREFIX "Frontend/UI")
+    qt_add_ui(chuckstation3_core SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/about.ui"
+        INCLUDE_PREFIX "Frontend/UI")
 endif()
 
 set_target_properties(chuckstation3_core PROPERTIES
@@ -250,7 +279,6 @@ if(ANDROID)
 elseif(ENABLE_QT_BUILD)
     # Qt6 desktop frontend. The main() in src/ChuckStation3.cpp is guarded by
     # CHUCKSTATION3_QT_BUILD, so we just turn it into the executable.
-    find_package(Qt6 REQUIRED COMPONENTS Widgets)
     add_executable(ChuckStation3 src/ChuckStation3.cpp)
     target_link_libraries(ChuckStation3 PRIVATE chuckstation3_core Qt6::Widgets)
     target_compile_definitions(ChuckStation3 PRIVATE QT_NO_OPENGL)
@@ -262,24 +290,6 @@ elseif(ENABLE_QT_BUILD)
         AUTORCC ON
         AUTOUIC ON
     )
-    qt_standard_project_setup()
-
-    # Qt UI files. Keep co-located with src/Frontend/UI/.
-    qt_add_ui(ChuckStation3 SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/mainwindow.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(ChuckStation3 SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/settings.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(ChuckStation3 SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/thread_debugger.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(ChuckStation3 SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/ppu_debugger.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(ChuckStation3 SOURCES
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/about.ui"
-        INCLUDE_PREFIX "Frontend/UI")
 
     qt_add_resources(ChuckStation3 "resources" PREFIX "/"
         FILES resources/icon-small.ico)
