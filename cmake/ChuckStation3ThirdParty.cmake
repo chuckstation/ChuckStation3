@@ -55,12 +55,5 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/toml11/CMakeLists.txt")
     add_subdirectory(third_party/toml11)
 endif()
 
-# ---------------------------------------------------------------------------
-# miniaudio — only on desktop. On Android we use OpenSL ES via SDL_audio
-# or Oboe (planned); the desktop single-file build is skipped here.
-# ---------------------------------------------------------------------------
-if(NOT ANDROID)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/miniaudio/CMakeLists.txt")
-        add_subdirectory(third_party/miniaudio)
-    endif()
-endif()
+# miniaudio is built directly by compiling third_party/miniaudio/miniaudio.c
+# into chuckstation3_core (see top-level CMakeLists.txt).
