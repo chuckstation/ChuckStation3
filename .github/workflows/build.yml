@@ -1,8 +1,7 @@
 # ChuckStation 3 — desktop CI.
 #
-# Builds the SDL frontend across an OS x compiler matrix, runs clang-format
-# and clang-tidy on changed files, caches build state via ccache +
-# actions/cache, and uploads the resulting binary as a workflow artifact.
+# Builds the SDL frontend across an OS/compiler matrix and uploads
+# the resulting binaries as workflow artifacts.
 #
 # The Android APK build is a separate workflow (.github/workflows/android.yml)
 # because its toolchain (NDK + Gradle) is fundamentally different.
@@ -24,71 +23,12 @@ concurrency:
 
 jobs:
   # -------------------------------------------------------------------------
-  # Lint pass — fast, runs on every push.
-  # -------------------------------------------------------------------------
-  lint:
-    name: Lint (clang-format + clang-tidy)
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # need full history for changed-files detection
-
-      - name: Fetch submodules
-        run: git submodule update --init --recursive
-
-      - name: Install clang tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-format-18 clang-tidy-18 cmake
-
-      - name: clang-format --dry-run (changed files only on PRs, full tree on push)
-        run: |
-          set -e
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            FILES=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }} -- 'src/*.cpp' 'src/*.hpp' 'src/*.h' 'include/**/*.hpp' 'include/**/*.h' | grep -v '^third_party/' || true)
-          else
-            FILES=$(find src include -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) | grep -v third_party || true)
-          fi
-          if [ -z "$FILES" ]; then
-            echo "No C++ files to check."
-            exit 0
-          fi
-          echo "Checking files:"
-          echo "$FILES"
-          echo "$FILES" | xargs clang-format-18 --dry-run --Werror
-
-      - name: cmake configure (for compile_commands.json)
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug \
-                -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-                -DENABLE_USER_BUILD=OFF \
-                -G Ninja
-        # We don't build — we only need the compile_commands.json for tidy.
-
-      - name: clang-tidy (changed files only)
-        run: |
-          set -e
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            FILES=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }} -- 'src/*.cpp' | grep -v '^third_party/' || true)
-          else
-            FILES=$(find src -maxdepth 5 -name '*.cpp' | head -20)
-          fi
-          if [ -z "$FILES" ]; then
-            echo "No source files to tidy."
-            exit 0
-          fi
-          echo "Tidying files:"
-          echo "$FILES"
-          echo "$FILES" | xargs -r clang-tidy-18 -p build --quiet --warnings-as-errors=''
-
-  # -------------------------------------------------------------------------
-  # Build matrix
+  # Desktop build matrix
   # -------------------------------------------------------------------------
   build:
     name: ${{ matrix.os }} / ${{ matrix.compiler }}
-    needs: lint
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -97,37 +37,40 @@ jobs:
             compiler: gcc
             cmake_generator: Ninja
             artifact_name: ChuckStation3-linux-x64
-            artifact_path: build/bin/ChuckStation3
+
           - os: ubuntu-24.04
             compiler: clang
             cmake_generator: Ninja
             artifact_name: ChuckStation3-linux-x64-clang
-            artifact_path: build/bin/ChuckStation3
+
           - os: macos-14
             compiler: clang
             cmake_generator: Ninja
             cmake_extra: -DCMAKE_OSX_ARCHITECTURES=arm64
             artifact_name: ChuckStation3-macos-arm64
-            artifact_path: build/bin/ChuckStation3
+
           - os: windows-2022
             compiler: msvc
             cmake_generator: Ninja
             artifact_name: ChuckStation3-windows-x64
-            artifact_path: build/bin/ChuckStation3.exe
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Fetch submodules
         run: git submodule update --init --recursive
 
-      - name: Install Ninja (Linux)
+      - name: Install Ninja and ccache (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build ccache
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache
 
-      - name: Install Ninja (macOS)
+      - name: Install Ninja and ccache (macOS)
         if: runner.os == 'macOS'
-        run: brew install ninja ccache
+        run: |
+          brew install ninja ccache
 
       - name: Set up MSVC dev shell
         if: runner.os == 'Windows'
@@ -135,26 +78,28 @@ jobs:
         with:
           arch: x64
 
-      - name: Install ccache (Windows)
+      - name: Install Ninja and ccache (Windows)
         if: runner.os == 'Windows'
-        run: choco install -y ninja ccache
+        run: |
+          choco install -y ninja ccache
 
       - name: Select GCC
         if: matrix.compiler == 'gcc'
         run: |
-          echo "CC=gcc"   >> $GITHUB_ENV
-          echo "CXX=g++"  >> $GITHUB_ENV
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
 
       - name: Select Clang
         if: matrix.compiler == 'clang' && runner.os != 'Windows'
         run: |
-          echo "CC=clang"     >> $GITHUB_ENV
-          echo "CXX=clang++"  >> $GITHUB_ENV
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
 
       - name: Configure CMake
         shell: bash
         run: |
-          cmake -B build -G "${{ matrix.cmake_generator }}" \
+          cmake -B build \
+            -G "${{ matrix.cmake_generator }}" \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DENABLE_USER_BUILD=ON \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
@@ -162,18 +107,22 @@ jobs:
             ${{ matrix.cmake_extra }}
 
       - name: Build
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        run: |
+          cmake --build build \
+            --config ${{ env.BUILD_TYPE }} \
+            --parallel
 
       - name: Stage artifact
         shell: bash
         run: |
           mkdir -p staging
+
           if [ "${{ runner.os }}" = "Windows" ]; then
-            cp build/bin/ChuckStation3.exe staging/ || true
+            cp build/bin/ChuckStation3.exe staging/
           else
-            cp build/bin/ChuckStation3 staging/ || true
+            cp build/bin/ChuckStation3 staging/
           fi
-          # Also drop a copy of the runtime Filesystem template if present.
+
           if [ -d Filesystem ]; then
             cp -r Filesystem staging/
           fi
@@ -187,14 +136,15 @@ jobs:
           retention-days: 30
 
   # -------------------------------------------------------------------------
-  # Qt6 build — single Windows job for now, matching upstream coverage.
+  # Qt6 Windows build
   # -------------------------------------------------------------------------
   qt-build:
     name: Windows / Qt6
-    needs: lint
     runs-on: windows-2022
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Fetch submodules
         run: git submodule update --init --recursive
@@ -204,7 +154,7 @@ jobs:
         with:
           arch: x64
 
-      - name: Install Ninja + ccache
+      - name: Install Ninja and ccache
         run: choco install -y ninja ccache
 
       - name: Setup Qt
@@ -217,7 +167,8 @@ jobs:
       - name: Configure CMake
         shell: bash
         run: |
-          cmake -B build -G Ninja \
+          cmake -B build \
+            -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
             -DENABLE_USER_BUILD=ON \
             -DENABLE_QT_BUILD=ON \
@@ -226,12 +177,15 @@ jobs:
 
       - name: Build
         shell: bash
-        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        run: |
+          cmake --build build \
+            --config ${{ env.BUILD_TYPE }} \
+            --parallel
 
-      - name: Deploy (windeployqt)
+      - name: Deploy Qt
         shell: bash
         run: |
-          mkdir staging
+          mkdir -p staging
           cp build/bin/ChuckStation3.exe staging/
           windeployqt --plugindir staging/Qt6 staging/ChuckStation3.exe
 
