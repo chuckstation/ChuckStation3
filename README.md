@@ -17,7 +17,7 @@ ChuckStation 3 is an experimental PS3 emulator based on "ChonkyStation3" (https:
 
 ## Repository
 
-- Repository: https://github.com/ChuckkStation/ChuckStation3
+- Repository: https://github.com/ChuckStation/ChuckStation3
 - Upstream: https://github.com/liuk7071/ChonkyStation3
 - License: GNU GPL v3
 
@@ -44,7 +44,7 @@ This project is a downstream fork of ChonkyStation3. The emulator core comes fro
 
 ### Desktop
 ```bash
-git clone --recursive https://github.com/ChcukStation/ChuckStation3.git
+git clone --recursive https://github.com/ChuckStation/ChuckStation3.git
 cd ChuckStation3
 
 cmake --preset default
