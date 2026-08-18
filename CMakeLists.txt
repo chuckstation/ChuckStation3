@@ -234,6 +234,7 @@ endif()
 if(ENABLE_QT_BUILD)
     target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_QT_BUILD QT_NO_OPENGL)
     target_link_libraries(chuckstation3_core PUBLIC Qt6::Widgets)
+    target_include_directories(chuckstation3_core PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
     set_target_properties(chuckstation3_core PROPERTIES
         AUTOMOC ON
         AUTORCC ON
@@ -245,7 +246,6 @@ if(ENABLE_QT_BUILD)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/thread_debugger.ui"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/ppu_debugger.ui"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/about.ui"
-        PUBLIC
         INCLUDE_PREFIX "Frontend/UI")
 endif()
 
@@ -276,14 +276,21 @@ elseif(ENABLE_QT_BUILD)
     target_link_libraries(ChuckStation3 PRIVATE chuckstation3_core Qt6::Widgets)
     target_compile_definitions(ChuckStation3 PRIVATE QT_NO_OPENGL)
     target_include_directories(ChuckStation3 PRIVATE
-        ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
-        $<TARGET_PROPERTY:chuckstation3_core,INCLUDE_DIRECTORIES>)
+        ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
     set_target_properties(ChuckStation3 PROPERTIES
         AUTOMOC ON
         AUTORCC ON
         AUTOUIC ON
     )
+
+    qt_add_ui(ChuckStation3 SOURCES
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/mainwindow.ui"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/settings.ui"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/thread_debugger.ui"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/ppu_debugger.ui"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/about.ui"
+        INCLUDE_PREFIX "Frontend/UI")
 
     qt_add_resources(ChuckStation3 "resources" PREFIX "/"
         FILES resources/icon-small.ico)
