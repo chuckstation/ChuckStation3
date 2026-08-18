@@ -188,6 +188,9 @@ target_link_libraries(chuckstation3_core PUBLIC
 # top-level CMake doesn't pull it in directly.
 if(NOT ANDROID)
     target_link_libraries(chuckstation3_core PUBLIC SDL2-static)
+else()
+    # NDK 26 libc++ requires linking c++experimental for std::format symbols.
+    target_link_libraries(chuckstation3_core PUBLIC c++experimental)
 endif()
 
 # miniaudio is a single .c file that needs to be compiled into the core.
@@ -221,7 +224,10 @@ if(ENABLE_USER_BUILD)
     target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_USER_BUILD)
 endif()
 if(ENABLE_QT_BUILD)
+    find_package(Qt6 REQUIRED COMPONENTS Widgets)
     target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_QT_BUILD)
+    target_link_libraries(chuckstation3_core PUBLIC Qt6::Widgets)
+    target_include_directories(chuckstation3_core PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 endif()
 
 set_target_properties(chuckstation3_core PROPERTIES
