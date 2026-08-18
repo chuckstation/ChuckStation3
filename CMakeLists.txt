@@ -232,7 +232,7 @@ if(ENABLE_USER_BUILD)
     target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_USER_BUILD)
 endif()
 if(ENABLE_QT_BUILD)
-    target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_QT_BUILD)
+    target_compile_definitions(chuckstation3_core PUBLIC CHUCKSTATION3_QT_BUILD QT_NO_OPENGL)
     target_link_libraries(chuckstation3_core PUBLIC Qt6::Widgets)
     set_target_properties(chuckstation3_core PROPERTIES
         AUTOMOC ON
