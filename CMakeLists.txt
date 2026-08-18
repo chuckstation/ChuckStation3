@@ -82,6 +82,8 @@ file(GLOB_RECURSE CHUCKSTATION3_CORE_HEADERS
     CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
 )
 
 # The Qt frontend files live under src/Frontend/ and are only compiled when
