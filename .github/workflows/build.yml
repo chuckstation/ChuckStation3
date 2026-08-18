@@ -152,7 +152,6 @@ jobs:
           echo "CXX=clang++"  >> $GITHUB_ENV
 
       - name: Configure CMake
-        shell: bash
         run: |
           cmake -B build -G "${{ matrix.cmake_generator }}" \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
