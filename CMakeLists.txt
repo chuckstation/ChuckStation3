@@ -295,6 +295,10 @@ elseif(ENABLE_QT_BUILD)
         FILES resources/icon-small.ico)
     qt_add_resources(ChuckStation3 "resources" PREFIX "/"
         FILES resources/Icons/loading.png)
+
+    # Ensure generated UI header paths from chuckstation3_core are visible to ChuckStation3 executable
+    get_target_property(CORE_BINARY_DIR chuckstation3_core BINARY_DIR)
+    target_include_directories(ChuckStation3 PRIVATE ${CORE_BINARY_DIR})
 else()
     # SDL desktop frontend. main() lives in src/ChuckStation3.cpp without the
     # Qt guard.
