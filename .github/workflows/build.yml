@@ -93,12 +93,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             compiler: gcc
             cmake_generator: Ninja
             artifact_name: ChuckStation3-linux-x64
             artifact_path: build/bin/ChuckStation3
-          - os: ubuntu-22.04
+          - os: ubuntu-24.04
             compiler: clang
             cmake_generator: Ninja
             artifact_name: ChuckStation3-linux-x64-clang
@@ -214,21 +214,24 @@ jobs:
           cache: true
 
       - name: Configure CMake
+        shell: bash
         run: |
-          cmake -B build -G Ninja `
-            -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE `
-            -DENABLE_USER_BUILD=ON `
-            -DENABLE_QT_BUILD=ON `
-            -DCMAKE_C_COMPILER_LAUNCHER=ccache `
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DENABLE_USER_BUILD=ON \
+            -DENABLE_QT_BUILD=ON \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
-        run: cmake --build build --config $env:BUILD_TYPE --parallel
+        shell: bash
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
 
       - name: Deploy (windeployqt)
+        shell: bash
         run: |
           mkdir staging
-          move build/bin/ChuckStation3.exe staging
+          cp build/bin/ChuckStation3.exe staging/
           windeployqt --plugindir staging/Qt6 staging/ChuckStation3.exe
 
       - name: Upload artifact
