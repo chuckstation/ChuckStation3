@@ -241,18 +241,11 @@ if(ENABLE_QT_BUILD)
     )
     qt_add_ui(chuckstation3_core SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/mainwindow.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(chuckstation3_core SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/settings.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(chuckstation3_core SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/thread_debugger.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(chuckstation3_core SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/ppu_debugger.ui"
-        INCLUDE_PREFIX "Frontend/UI")
-    qt_add_ui(chuckstation3_core SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/src/Frontend/UI/about.ui"
+        PUBLIC
         INCLUDE_PREFIX "Frontend/UI")
 endif()
 
@@ -283,7 +276,8 @@ elseif(ENABLE_QT_BUILD)
     target_link_libraries(ChuckStation3 PRIVATE chuckstation3_core Qt6::Widgets)
     target_compile_definitions(ChuckStation3 PRIVATE QT_NO_OPENGL)
     target_include_directories(ChuckStation3 PRIVATE
-        ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
+        ${Qt6Gui_PRIVATE_INCLUDE_DIRS}
+        $<TARGET_PROPERTY:chuckstation3_core,INCLUDE_DIRECTORIES>)
 
     set_target_properties(ChuckStation3 PROPERTIES
         AUTOMOC ON
@@ -295,10 +289,6 @@ elseif(ENABLE_QT_BUILD)
         FILES resources/icon-small.ico)
     qt_add_resources(ChuckStation3 "resources" PREFIX "/"
         FILES resources/Icons/loading.png)
-
-    # Ensure generated UI header paths from chuckstation3_core are visible to ChuckStation3 executable
-    get_target_property(CORE_BINARY_DIR chuckstation3_core BINARY_DIR)
-    target_include_directories(ChuckStation3 PRIVATE ${CORE_BINARY_DIR})
 else()
     # SDL desktop frontend. main() lives in src/ChuckStation3.cpp without the
     # Qt guard.
